@@ -2,3 +2,6 @@ project_id = "yitzfkcmozjpmyyejdxh"
 
 [functions.safety-ai]
 verify_jwt = false
+
+[functions.sos-alert]
+verify_jwt = false

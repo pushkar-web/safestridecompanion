@@ -1,19 +1,49 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Bell, Shield, Mic, ChevronRight, Menu, AlertTriangle, ArrowRight } from "lucide-react";
+import { Bell, Shield, Mic, MicOff, Menu, AlertTriangle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useVoiceInput } from "@/hooks/use-voice-input";
+import { useTrip } from "@/contexts/TripContext";
+import { toast } from "@/hooks/use-toast";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [isListening, setIsListening] = useState(false);
+  const { startTrip } = useTrip();
+  const [spokenText, setSpokenText] = useState("");
 
-  const handleVoice = () => {
-    setIsListening(true);
-    setTimeout(() => {
-      setIsListening(false);
-      navigate("/planner");
-    }, 2000);
+  const handleVoiceResult = useCallback((text: string) => {
+    setSpokenText(text);
+    toast({ title: "Voice captured", description: `"${text}"` });
+
+    // Parse destination from spoken text
+    const lower = text.toLowerCase();
+    let from = "Andheri";
+    let to = "Bandra";
+
+    // Try to extract locations
+    const mumbaiLocations = ["bandra", "andheri", "juhu", "kurla", "dadar", "worli", "colaba", "churchgate", "goregaon", "malad", "borivali"];
+    const mentioned = mumbaiLocations.filter((loc) => lower.includes(loc));
+    if (mentioned.length >= 2) {
+      from = mentioned[0].charAt(0).toUpperCase() + mentioned[0].slice(1);
+      to = mentioned[1].charAt(0).toUpperCase() + mentioned[1].slice(1);
+    } else if (mentioned.length === 1) {
+      to = mentioned[0].charAt(0).toUpperCase() + mentioned[0].slice(1);
+    }
+
+    startTrip(from, to);
+
+    setTimeout(() => navigate("/planner"), 1000);
+  }, [navigate, startTrip]);
+
+  const { isListening, transcript, error, startListening, stopListening } = useVoiceInput(handleVoiceResult);
+
+  const handleVoiceToggle = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
   };
 
   return (
@@ -47,17 +77,42 @@ const Home = () => {
         {/* Voice CTA */}
         <div className="flex flex-col items-center pt-6 pb-2">
           <motion.button
-            onClick={handleVoice}
+            onClick={handleVoiceToggle}
             className={`h-20 w-20 rounded-full flex items-center justify-center ${
               isListening ? "gradient-safe glow-safe" : "gradient-purple glow-purple"
             }`}
             animate={isListening ? { scale: [1, 1.1, 1] } : {}}
             transition={{ repeat: Infinity, duration: 1 }}
           >
-            <Mic size={32} className="text-primary-foreground" />
+            {isListening ? (
+              <MicOff size={32} className="text-primary-foreground" />
+            ) : (
+              <Mic size={32} className="text-primary-foreground" />
+            )}
           </motion.button>
           <p className="text-xs font-semibold text-primary mt-3 uppercase tracking-wide">
             {isListening ? "Listening..." : "Speak Route"}
+          </p>
+
+          {/* Live transcript */}
+          {(transcript || spokenText) && (
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-2 px-4 py-2 rounded-lg bg-accent/50 max-w-[280px]"
+            >
+              <p className="text-sm text-foreground italic">
+                "{transcript || spokenText}"
+              </p>
+            </motion.div>
+          )}
+
+          {error && (
+            <p className="text-xs text-destructive mt-2">{error}</p>
+          )}
+
+          <p className="text-[10px] text-muted-foreground mt-2">
+            Try: "Navigate me safely to Bandra West"
           </p>
         </div>
       </div>
@@ -68,7 +123,6 @@ const Home = () => {
           Safety Insights
         </h3>
 
-        {/* Today's Risk */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -91,7 +145,6 @@ const Home = () => {
           </div>
         </motion.div>
 
-        {/* Last Trip */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}

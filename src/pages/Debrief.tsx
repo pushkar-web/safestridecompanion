@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Shield, CheckCircle, BookOpen, Share2, ChevronRight, MapPin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { generateBadge, type BadgeData } from "@/lib/safety-ai";
+import { useTrip } from "@/contexts/TripContext";
 import { toast } from "@/hooks/use-toast";
 
 const emojis = [
@@ -16,17 +17,21 @@ const emojis = [
 
 const Debrief = () => {
   const navigate = useNavigate();
+  const { trip } = useTrip();
   const [badge, setBadge] = useState<BadgeData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const routeFrom = trip?.routeFrom || "Andheri";
+  const routeTo = trip?.routeTo || "Bandra";
+  const risksAverted = trip?.risksAverted || 3;
 
   useEffect(() => {
     const fetchBadge = async () => {
       try {
-        const data = await generateBadge("Andheri", "Bandra", 3);
+        const data = await generateBadge(routeFrom, routeTo, risksAverted);
         setBadge(data);
       } catch (e) {
         console.error("Badge generation error:", e);
-        toast({ title: "Badge Generation", description: "Using default badge", variant: "destructive" });
         setBadge({
           badge_title: "Safe Navigator",
           badge_description: "Completed a safe journey through Mumbai",
@@ -40,7 +45,24 @@ const Debrief = () => {
       }
     };
     fetchBadge();
-  }, []);
+  }, [routeFrom, routeTo, risksAverted]);
+
+  const handleShare = async () => {
+    if (navigator.share && badge) {
+      try {
+        await navigator.share({
+          title: `SafeStride Badge: ${badge.badge_title}`,
+          text: `${badge.achievement_message}\n\n${badge.safety_tip}`,
+          url: window.location.href,
+        });
+      } catch {
+        toast({ title: "Copied!", description: "Badge link copied to clipboard" });
+      }
+    } else {
+      navigator.clipboard.writeText(`SafeStride Badge: ${badge?.badge_title} - ${badge?.achievement_message}`);
+      toast({ title: "Copied!", description: "Badge details copied to clipboard" });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-8">
@@ -52,7 +74,7 @@ const Debrief = () => {
           </button>
           <h1 className="font-display font-bold text-foreground">Post-Trip Debrief</h1>
         </div>
-        <button className="text-muted-foreground">
+        <button onClick={handleShare} className="text-muted-foreground">
           <Share2 size={18} />
         </button>
       </div>
@@ -67,7 +89,9 @@ const Debrief = () => {
           <CheckCircle size={40} className="text-safe" />
         </div>
         <h2 className="text-xl font-display font-bold text-foreground">Well Done, Traveler!</h2>
-        <p className="text-sm text-muted-foreground mt-1">You've reached your destination safely.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {routeFrom} → {routeTo} completed safely.
+        </p>
       </motion.div>
 
       {/* Risks Averted */}
@@ -79,7 +103,7 @@ const Debrief = () => {
           className="card-elevated rounded-xl p-4 text-center mb-3"
         >
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Risks Averted</p>
-          <p className="text-3xl font-display font-bold text-foreground mt-1">3</p>
+          <p className="text-3xl font-display font-bold text-foreground mt-1">{risksAverted}</p>
           <div className="flex items-center justify-center gap-1 mt-1">
             <Shield size={12} className="text-safe" />
             <span className="text-xs font-semibold text-safe">Safe Conduct</span>
@@ -125,7 +149,6 @@ const Debrief = () => {
             <p className="text-lg font-display font-bold text-foreground mb-1">"{badge.badge_title}"</p>
             <p className="text-xs text-muted-foreground text-center mb-3">{badge.badge_description}</p>
             
-            {/* Generated badge visual */}
             <div className="h-24 w-24 rounded-2xl gradient-purple flex items-center justify-center mb-3 glow-purple">
               <Shield size={40} className="text-primary-foreground" />
             </div>
@@ -137,14 +160,14 @@ const Debrief = () => {
               <p className="text-xs text-foreground">{badge.safety_tip}</p>
             </div>
 
-            <Button className="gradient-purple text-primary-foreground rounded-xl px-6 glow-purple">
+            <Button onClick={handleShare} className="gradient-purple text-primary-foreground rounded-xl px-6 glow-purple">
               <Share2 size={14} className="mr-2" /> Share Achievement
             </Button>
           </>
         ) : null}
       </motion.div>
 
-      {/* Know Your Rights - AI sourced */}
+      {/* Know Your Rights */}
       <div className="px-5 pt-5">
         <div className="card-elevated rounded-xl overflow-hidden">
           <div className="h-20 bg-accent/30 flex items-center justify-center">
@@ -168,7 +191,6 @@ const Debrief = () => {
         </div>
       </div>
 
-      {/* RAG Sources */}
       {badge?.rag_sources && badge.rag_sources.length > 0 && (
         <div className="px-5 pt-3">
           <p className="text-[10px] text-muted-foreground text-center">
@@ -186,6 +208,7 @@ const Debrief = () => {
             <button
               key={e.label}
               className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-accent transition-colors"
+              onClick={() => toast({ title: "Thanks!", description: `Feedback: ${e.label} recorded` })}
             >
               <span className="text-2xl">{e.emoji}</span>
               <span className="text-[10px] text-muted-foreground">{e.label}</span>

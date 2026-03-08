@@ -6,23 +6,32 @@ import { Button } from "@/components/ui/button";
 import RiskGauge from "@/components/RiskGauge";
 import RouteMap from "@/components/RouteMap";
 import { assessRouteRisk, type RiskAssessment } from "@/lib/safety-ai";
+import { useTrip } from "@/contexts/TripContext";
 import { toast } from "@/hooks/use-toast";
 
 const Planner = () => {
   const navigate = useNavigate();
+  const { trip, startTrip, triggerSOS, sosStatus } = useTrip();
   const [riskScore, setRiskScore] = useState(85);
   const [stalkerMode, setStalkerMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [assessment, setAssessment] = useState<RiskAssessment | null>(null);
-  const [routeFrom] = useState("Andheri");
-  const [routeTo] = useState("Bandra");
+
+  const routeFrom = trip?.routeFrom || "Andheri";
+  const routeTo = trip?.routeTo || "Bandra";
+
+  useEffect(() => {
+    if (!trip) {
+      startTrip(routeFrom, routeTo);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchAssessment = async () => {
       try {
         const data = await assessRouteRisk(routeFrom, routeTo, "10 PM");
         setAssessment(data);
-        setRiskScore(100 - data.risk_score); // Invert: high safety = high score
+        setRiskScore(100 - data.risk_score);
       } catch (e) {
         console.error("Risk assessment error:", e);
         toast({ title: "AI Assessment", description: "Using cached safety data", variant: "destructive" });
@@ -34,8 +43,10 @@ const Planner = () => {
     fetchAssessment();
   }, [routeFrom, routeTo]);
 
-  const triggerStalker = () => {
+  const triggerStalker = async () => {
     setStalkerMode(true);
+    
+    // Animate risk drop
     let current = riskScore;
     const interval = setInterval(() => {
       current -= 3;
@@ -45,6 +56,9 @@ const Planner = () => {
       }
       setRiskScore(current);
     }, 80);
+
+    // Trigger real SOS
+    await triggerSOS();
   };
 
   const riskLabel = riskScore >= 70 ? "Safe" : riskScore >= 40 ? "Moderate" : "High Risk";
@@ -184,9 +198,28 @@ const Planner = () => {
                 <div className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
                 <span className="text-sm font-semibold text-destructive">THREAT DETECTED</span>
               </div>
-              <p className="text-xs text-muted-foreground mb-3">
+              <p className="text-xs text-muted-foreground mb-1">
                 Rerouting... Emergency contacts notified. Risk dropping.
               </p>
+
+              {/* SOS Status */}
+              <div className="mb-3">
+                {sosStatus === "sending" && (
+                  <div className="flex items-center gap-2">
+                    <Loader2 size={12} className="animate-spin text-destructive" />
+                    <span className="text-xs text-destructive">Sending SOS alert...</span>
+                  </div>
+                )}
+                {sosStatus === "sent" && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-safe font-semibold">✓ SOS sent! Contacts notified. Emergency services alerted.</span>
+                  </div>
+                )}
+                {sosStatus === "error" && (
+                  <span className="text-xs text-destructive">SOS send failed. Call 100 directly.</span>
+                )}
+              </div>
+
               <div className="flex gap-2">
                 <Button
                   size="sm"

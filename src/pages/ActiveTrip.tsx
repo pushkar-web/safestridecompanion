@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { X, AlertTriangle, Navigation, Phone, Shield, Clock, Heart, Search, Zap, ChevronRight } from "lucide-react";
+import { X, AlertTriangle, Phone, Shield, Heart, Search, Zap, ChevronRight, Loader2, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RouteMap from "@/components/RouteMap";
+import { useTrip } from "@/contexts/TripContext";
+import { toast } from "@/hooks/use-toast";
 
 const ActiveTrip = () => {
   const navigate = useNavigate();
+  const { trip, endTrip, incrementRisks, triggerSOS, sosStatus } = useTrip();
   const [bpm, setBpm] = useState(72);
   const [riskLevel, setRiskLevel] = useState(15);
   const [elapsed, setElapsed] = useState(0);
   const [alert, setAlert] = useState<string | null>(null);
-  const [sosSlide, setSosSlide] = useState(0);
+  const [fakeCallActive, setFakeCallActive] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -20,6 +23,7 @@ const ActiveTrip = () => {
     const alertTimeout = setTimeout(() => {
       setAlert("Unusual Stop Detected");
       setRiskLevel(42);
+      incrementRisks();
       setTimeout(() => {
         setAlert(null);
         setRiskLevel(15);
@@ -39,12 +43,68 @@ const ActiveTrip = () => {
     return `${m.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   };
 
+  const handleEndTrip = async () => {
+    await endTrip();
+    navigate("/debrief");
+  };
+
+  const handleSOS = async () => {
+    await triggerSOS();
+    toast({
+      title: "🚨 SOS Triggered",
+      description: "Emergency contacts have been notified with your live location.",
+    });
+  };
+
+  const handleFakeCall = () => {
+    setFakeCallActive(true);
+    // Simulate incoming call vibration pattern
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200, 100, 200]);
+    }
+    toast({
+      title: "📞 Incoming Call",
+      description: '"Mom' is calling... (fake call activated)',
+    });
+    setTimeout(() => setFakeCallActive(false), 10000);
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 relative">
+      {/* Fake Call Overlay */}
+      {fakeCallActive && (
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed top-0 left-0 right-0 z-50 gradient-purple p-6 text-center max-w-md mx-auto"
+        >
+          <p className="text-primary-foreground/80 text-sm">Incoming Call</p>
+          <p className="text-primary-foreground text-xl font-display font-bold mt-1">Mom</p>
+          <p className="text-primary-foreground/60 text-xs mt-1">Mobile</p>
+          <div className="flex justify-center gap-6 mt-4">
+            <button
+              onClick={() => setFakeCallActive(false)}
+              className="h-14 w-14 rounded-full bg-destructive flex items-center justify-center"
+            >
+              <Phone size={24} className="text-destructive-foreground rotate-[135deg]" />
+            </button>
+            <button
+              onClick={() => {
+                setFakeCallActive(false);
+                toast({ title: "Call Connected", description: "Playing pre-recorded conversation..." });
+              }}
+              className="h-14 w-14 rounded-full bg-safe flex items-center justify-center"
+            >
+              <Phone size={24} className="text-primary-foreground" />
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/debrief")} className="text-foreground">
+          <button onClick={handleEndTrip} className="text-foreground">
             <X size={20} />
           </button>
           <div>
@@ -128,10 +188,18 @@ const ActiveTrip = () => {
             <span className="text-sm font-semibold text-destructive">{alert}</span>
           </div>
           <p className="text-xs text-muted-foreground">Are you okay? Select a quick action below.</p>
-          <div className="mt-2">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Actions Needed</p>
-            <button className="text-xs text-primary font-medium flex items-center gap-1">
-              Trigger "Fake Call" Player <ChevronRight size={12} />
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={handleFakeCall}
+              className="text-xs text-primary font-medium flex items-center gap-1 card-elevated rounded-lg px-3 py-2"
+            >
+              📞 Fake Call
+            </button>
+            <button
+              onClick={handleSOS}
+              className="text-xs text-destructive font-medium flex items-center gap-1 card-elevated rounded-lg px-3 py-2"
+            >
+              🚨 SOS Alert
             </button>
           </div>
         </motion.div>
@@ -141,20 +209,20 @@ const ActiveTrip = () => {
       <div className="px-4 pt-4">
         <div className="relative h-14 rounded-full bg-destructive/10 border border-destructive/30 overflow-hidden flex items-center">
           <motion.div
-            className="absolute left-1 h-12 w-12 rounded-full bg-destructive flex items-center justify-center cursor-grab"
+            className="absolute left-1 h-12 w-12 rounded-full bg-destructive flex items-center justify-center cursor-grab z-10"
             drag="x"
             dragConstraints={{ left: 0, right: 250 }}
             dragElastic={0}
             onDragEnd={(_, info) => {
               if (info.offset.x > 200) {
-                // SOS triggered
+                handleSOS();
               }
             }}
           >
             <Phone size={20} className="text-destructive-foreground" />
           </motion.div>
           <span className="w-full text-center text-sm font-semibold text-destructive">
-            SLIDE TO SOS →→→
+            {sosStatus === "sending" ? "Sending SOS..." : sosStatus === "sent" ? "✓ SOS Sent!" : "SLIDE TO SOS →→→"}
           </span>
         </div>
       </div>
@@ -162,7 +230,7 @@ const ActiveTrip = () => {
       {/* End Trip */}
       <div className="px-4 pt-3">
         <Button
-          onClick={() => navigate("/debrief")}
+          onClick={handleEndTrip}
           variant="outline"
           className="w-full border-primary text-primary py-4 rounded-xl"
         >
