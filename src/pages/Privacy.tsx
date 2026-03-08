@@ -1,100 +1,132 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield, Lock, Database, Smartphone, Cloud, RefreshCw, Trash2, Eye, ChevronRight } from "lucide-react";
+import { Shield, Lock, Database, Smartphone, Cloud, RefreshCw, Trash2, Eye, ChevronRight, Sparkles, Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Privacy = () => {
   const [activeTab, setActiveTab] = useState<"home" | "cloud" | "local">("home");
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 gradient-bg-subtle">
       {/* Header */}
-      <div className="flex items-center justify-between p-4">
-        <h1 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
-          <Shield className="text-primary" size={20} /> Privacy Dashboard
+      <div className="flex items-center justify-between p-4 pt-5">
+        <h1 className="text-base font-display font-bold text-foreground flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg gradient-purple flex items-center justify-center">
+            <Shield size={16} className="text-primary-foreground" />
+          </div>
+          Privacy Dashboard
         </h1>
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">PRO</span>
+        <span className="text-[9px] px-2.5 py-1 rounded-full gradient-purple text-primary-foreground font-bold">PRO</span>
       </div>
 
       {/* Storage + Encryption */}
-      <div className="flex gap-3 px-4">
+      <div className="flex gap-3 px-4 mt-2">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex-1 card-elevated rounded-xl p-4 text-center"
+          className="flex-1 card-interactive rounded-2xl p-4 text-center"
         >
-          <Database size={18} className="text-primary mx-auto mb-2" />
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Local Storage</p>
-          <p className="text-xl font-display font-bold text-foreground">1.2 GB</p>
-          <p className="text-[10px] text-muted-foreground">Optimized</p>
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
+            <Database size={18} className="text-primary" />
+          </div>
+          <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-semibold">Local Storage</p>
+          <p className="text-xl font-display font-bold text-foreground mt-0.5">1.2 GB</p>
+          <p className="text-[9px] text-safe font-semibold">Optimized ✓</p>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="flex-1 card-elevated rounded-xl p-4 text-center"
+          className="flex-1 card-interactive rounded-2xl p-4 text-center"
         >
-          <Lock size={18} className="text-safe mx-auto mb-2" />
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Encryption</p>
-          <p className="text-xl font-display font-bold text-foreground">AES-256</p>
-          <p className="text-[10px] text-muted-foreground">Production Grade</p>
+          <div className="h-10 w-10 rounded-xl bg-safe/10 flex items-center justify-center mx-auto mb-2">
+            <Lock size={18} className="text-safe" />
+          </div>
+          <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-semibold">Encryption</p>
+          <p className="text-xl font-display font-bold text-foreground mt-0.5">AES-256</p>
+          <p className="text-[9px] text-safe font-semibold">Production Grade ✓</p>
         </motion.div>
       </div>
 
       {/* Data Flow Tabs */}
-      <div className="px-4 pt-5">
-        <h3 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-          <Eye size={12} /> DATA FLOW TRANSPARENCY
+      <div className="px-4 pt-6">
+        <h3 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5 uppercase tracking-widest">
+          <Eye size={12} /> Data Flow Transparency
         </h3>
-        <div className="flex gap-1 bg-secondary rounded-lg p-1 mb-3">
+        <div className="flex gap-1 glass-card rounded-xl p-1 mb-3">
           {(["home", "cloud", "local"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 text-xs font-medium py-2 rounded-md transition-colors capitalize ${
+              className={`flex-1 text-xs font-semibold py-2.5 rounded-lg transition-all capitalize ${
                 activeTab === tab
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground"
+                  ? "gradient-purple text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {tab === "local" ? "Local AI" : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
-        <div className="card-elevated rounded-xl p-3">
-          <p className="text-xs text-muted-foreground">
-            {activeTab === "home" && "Your data is processed and stored locally on your device. No external transfers."}
-            {activeTab === "cloud" && "Encrypted backups are sent to secure cloud storage. Only you hold the key."}
-            {activeTab === "local" && "AI models run entirely on-device. No data leaves your phone for AI processing."}
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card-elevated rounded-2xl p-4"
+        >
+          <p className="text-sm text-foreground leading-relaxed">
+            {activeTab === "home" && (
+              <>
+                <Fingerprint size={14} className="inline text-primary mr-1.5 -mt-0.5" />
+                Your data is processed and stored locally on your device. No external transfers occur.
+              </>
+            )}
+            {activeTab === "cloud" && (
+              <>
+                <Cloud size={14} className="inline text-primary mr-1.5 -mt-0.5" />
+                Encrypted backups are sent to secure cloud storage. Only you hold the decryption key.
+              </>
+            )}
+            {activeTab === "local" && (
+              <>
+                <Sparkles size={14} className="inline text-primary mr-1.5 -mt-0.5" />
+                AI models run entirely on-device. No data leaves your phone for AI processing.
+              </>
+            )}
           </p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Activity Audit Log */}
-      <div className="px-4 pt-5">
+      <div className="px-4 pt-6">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-semibold text-muted-foreground">ACTIVITY AUDIT LOG</h3>
-          <button className="text-xs text-primary font-medium">View All</button>
+          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Activity Audit Log</h3>
+          <button className="text-[10px] text-primary font-bold uppercase tracking-wider">View All</button>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {[
-            { title: "Local Voice Analysis", desc: "Mic used for 2 min for SOS trigger/listening command", time: "2m ago" },
-            { title: "Accelerometer Read", desc: "Motion data analyzed locally for fall detection", time: "5m ago" },
-            { title: "Location Fencing", desc: "Geofence check completed. No breach. Data not transmitted, GPS reads: 4", time: "8m ago" },
+            { title: "Local Voice Analysis", desc: "Mic used for 2 min for SOS trigger command", time: "2m ago", icon: "🎙️" },
+            { title: "Accelerometer Read", desc: "Motion data analyzed locally for fall detection", time: "5m ago", icon: "📱" },
+            { title: "Location Fencing", desc: "Geofence check completed. No breach detected", time: "8m ago", icon: "📍" },
           ].map((item, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + i * 0.1 }}
-              className="card-elevated rounded-xl p-3"
+              transition={{ delay: 0.2 + i * 0.08 }}
+              className="card-interactive rounded-2xl p-3.5"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-sm text-foreground font-medium">{item.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+              <div className="flex items-start gap-3">
+                <div className="h-9 w-9 rounded-xl bg-accent flex items-center justify-center flex-shrink-0 text-base">
+                  {item.icon}
                 </div>
-                <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">{item.time}</span>
+                <div className="flex-1">
+                  <div className="flex items-start justify-between">
+                    <p className="text-sm text-foreground font-semibold">{item.title}</p>
+                    <span className="text-[9px] text-muted-foreground flex-shrink-0 ml-2 bg-muted px-2 py-0.5 rounded-full font-medium">{item.time}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -102,14 +134,16 @@ const Privacy = () => {
       </div>
 
       {/* Delete Data */}
-      <div className="px-4 pt-5">
+      <div className="px-4 pt-6">
         <Button
           variant="outline"
-          className="w-full border-destructive text-destructive hover:bg-destructive/10 py-4 rounded-xl"
+          className="w-full border-2 border-destructive/20 text-destructive hover:bg-destructive/5 py-4 rounded-2xl font-semibold"
         >
           <Trash2 size={16} className="mr-2" /> One-Tap: Delete All Local Data
         </Button>
-        <p className="text-[10px] text-center text-muted-foreground mt-2">SafeStride v2.4.0</p>
+        <p className="text-[10px] text-center text-muted-foreground mt-3 flex items-center justify-center gap-1">
+          <Shield size={8} /> SafeStride v2.4.0
+        </p>
       </div>
     </div>
   );
