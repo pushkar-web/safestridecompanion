@@ -14,13 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      safety_documents: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          embedding: string | null
+          id: string
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          metadata: Json | null
+          title: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          metadata?: Json | null
+          title: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          metadata?: Json | null
+          title?: string
+        }
+        Relationships: []
+      }
+      trip_history: {
+        Row: {
+          badge_description: string | null
+          badge_title: string | null
+          created_at: string
+          duration_seconds: number | null
+          end_lat: number | null
+          end_lng: number | null
+          end_location: string | null
+          feedback: string | null
+          id: string
+          risk_score: number | null
+          risks_averted: number | null
+          session_id: string
+          start_lat: number | null
+          start_lng: number | null
+          start_location: string | null
+        }
+        Insert: {
+          badge_description?: string | null
+          badge_title?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          end_location?: string | null
+          feedback?: string | null
+          id?: string
+          risk_score?: number | null
+          risks_averted?: number | null
+          session_id: string
+          start_lat?: number | null
+          start_lng?: number | null
+          start_location?: string | null
+        }
+        Update: {
+          badge_description?: string | null
+          badge_title?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          end_location?: string | null
+          feedback?: string | null
+          id?: string
+          risk_score?: number | null
+          risks_averted?: number | null
+          session_id?: string
+          start_lat?: number | null
+          start_lng?: number | null
+          start_location?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_safety_documents: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          category: string
+          content: string
+          id: string
+          latitude: number
+          location_name: string
+          longitude: number
+          similarity: number
+          title: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
