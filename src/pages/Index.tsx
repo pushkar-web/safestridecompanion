@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Shield, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import logo from "@/assets/safestride-logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const Index = () => {
         className="flex flex-col items-center gap-5 z-10"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] as const }}
       >
         {/* Logo */}
         <motion.div
@@ -38,11 +39,11 @@ const Index = () => {
           transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
         >
           <motion.div
-            className="h-28 w-28 rounded-3xl gradient-purple flex items-center justify-center glow-purple"
+            className="h-28 w-28 rounded-3xl bg-card flex items-center justify-center glow-purple shadow-lg"
             animate={{ scale: [1, 1.03, 1] }}
             transition={{ repeat: Infinity, duration: 2.5 }}
           >
-            <Shield size={52} className="text-primary-foreground" />
+            <img src={logo} alt="SafeStride" className="h-20 w-20 object-contain" />
           </motion.div>
           <motion.div
             className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-accent flex items-center justify-center"
