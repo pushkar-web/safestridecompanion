@@ -4,7 +4,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import Onboarding from "./pages/Onboarding";
+import Home from "./pages/Home";
+import Planner from "./pages/Planner";
+import ActiveTrip from "./pages/ActiveTrip";
+import Debrief from "./pages/Debrief";
+import Privacy from "./pages/Privacy";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import BottomNav from "./components/BottomNav";
 
 const queryClient = new QueryClient();
 
@@ -14,11 +22,20 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="mx-auto max-w-md min-h-screen relative">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/planner" element={<Planner />} />
+            <Route path="/active" element={<ActiveTrip />} />
+            <Route path="/debrief" element={<Debrief />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <BottomNav />
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
