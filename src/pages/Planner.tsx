@@ -1,15 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, MapPin, AlertTriangle, Shield, Zap, Navigation } from "lucide-react";
+import { ArrowLeft, MapPin, AlertTriangle, Shield, Zap, Navigation, Search, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RiskGauge from "@/components/RiskGauge";
-
-const insights = [
-  { icon: AlertTriangle, text: "Avoid 13th Cross Alley", color: "text-warning" },
-  { icon: Shield, text: "Toke Ride Safe Road", color: "text-safe" },
-  { icon: Zap, text: "SafeStride emergency helpline is standing by", color: "text-primary" },
-];
 
 const Planner = () => {
   const navigate = useNavigate();
@@ -18,7 +12,6 @@ const Planner = () => {
 
   const triggerStalker = () => {
     setStalkerMode(true);
-    // Animate risk drop from 85 to 12
     let current = 85;
     const interval = setInterval(() => {
       current -= 3;
@@ -31,34 +24,53 @@ const Planner = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4">
-        <button onClick={() => navigate("/home")} className="text-foreground">
-          <ArrowLeft size={20} />
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/home")} className="text-foreground">
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex items-center gap-1.5">
+            <Shield className="text-primary" size={18} />
+            <span className="font-display font-bold text-foreground">SafeStride</span>
+          </div>
+        </div>
+        <button className="text-muted-foreground">
+          <Search size={20} />
         </button>
-        <h1 className="font-display font-bold text-foreground">SafeStride Planner</h1>
       </div>
 
       {/* Route info */}
-      <div className="mx-4 glass-card rounded-xl p-3 mb-4">
-        <div className="flex items-center gap-2 text-sm text-foreground">
-          <MapPin size={14} className="text-primary" />
-          <span>Metro Andheri to Bandra, 10PM solo</span>
+      <div className="mx-4 card-elevated rounded-xl p-3 mb-4 flex items-center gap-2">
+        <MapPin size={16} className="text-primary flex-shrink-0" />
+        <span className="text-sm text-foreground">Central Station via Midtown</span>
+        <ChevronRight size={14} className="text-muted-foreground ml-auto" />
+      </div>
+
+      {/* Route Safety Header + Risk Gauge */}
+      <div className="px-4">
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-sm font-semibold text-primary">Route Safety</h3>
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+            riskScore >= 70 ? "bg-safe/15 text-safe" : riskScore >= 40 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"
+          }`}>
+            {riskScore >= 70 ? "● High" : riskScore >= 40 ? "● Medium" : "● Low"}
+          </span>
+        </div>
+        <div className="card-elevated rounded-xl p-4">
+          <p className="text-xs text-muted-foreground text-center mb-1">RISK SCORE GAUGE</p>
+          <div className="flex justify-center">
+            <RiskGauge score={riskScore} size={200} label={`${riskScore >= 70 ? "Safe" : riskScore >= 40 ? "Moderate" : "High Risk"}`} />
+          </div>
+          <p className="text-[10px] text-muted-foreground text-center mt-1">
+            Statistically safer than 80% of alternate routes
+          </p>
         </div>
       </div>
 
-      {/* Risk Gauge */}
-      <div className="flex flex-col items-center">
-        <p className="text-xs text-muted-foreground mb-1">ROUTE SAFETY SCORE</p>
-        <RiskGauge
-          score={riskScore}
-          label={riskScore >= 70 ? "Safe" : riskScore >= 40 ? "Moderate" : "High Risk"}
-        />
-      </div>
-
       {/* Map placeholder */}
-      <div className="mx-4 mt-4 rounded-xl overflow-hidden border border-border h-40 relative bg-secondary">
+      <div className="mx-4 mt-4 rounded-xl overflow-hidden border border-border h-44 relative bg-secondary">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <Navigation size={24} className="text-primary mx-auto mb-1" />
@@ -66,12 +78,11 @@ const Planner = () => {
             <p className="text-[10px] text-muted-foreground">Andheri → Bandra West</p>
           </div>
         </div>
-        {/* Simulated route line */}
         <svg className="absolute inset-0 w-full h-full">
           <motion.path
-            d="M 30 120 Q 80 40 150 80 Q 220 120 300 30"
+            d="M 30 140 Q 80 40 180 90 Q 280 140 350 30"
             fill="none"
-            stroke="hsl(270, 85%, 58%)"
+            stroke="hsl(262, 83%, 58%)"
             strokeWidth="3"
             strokeLinecap="round"
             strokeDasharray="8 4"
@@ -84,22 +95,33 @@ const Planner = () => {
 
       {/* AI Safety Insights */}
       <div className="px-4 pt-4">
-        <h3 className="text-xs font-semibold text-primary flex items-center gap-1 mb-2">
-          <Zap size={12} /> AI Safety Insight
-        </h3>
         <div className="space-y-2">
-          {insights.map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 + i * 0.15 }}
-              className="glass-card rounded-lg p-2.5 flex items-center gap-2"
-            >
-              <item.icon size={14} className={item.color} />
-              <span className="text-xs text-foreground">{item.text}</span>
-            </motion.div>
-          ))}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+            className="card-elevated rounded-xl p-3 flex items-center gap-3"
+          >
+            <AlertTriangle size={16} className="text-warning flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm text-foreground">Avoid 12th Cross Alley</p>
+              <p className="text-xs text-muted-foreground">Incidents nearby, take Main Link Road</p>
+            </div>
+            <span className="text-xs font-bold text-safe">+87% safety</span>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+            className="card-elevated rounded-xl p-3 flex items-center gap-3"
+          >
+            <Zap size={16} className="text-primary flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm text-foreground">Fast ahead quiet. Detour now?</p>
+              <p className="text-xs text-muted-foreground">Alternative route available</p>
+            </div>
+          </motion.div>
         </div>
       </div>
 
@@ -119,19 +141,19 @@ const Planner = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="glass-card rounded-xl p-4 border border-destructive/50"
+              className="card-elevated rounded-xl p-4 border-destructive/30 border"
             >
               <div className="flex items-center gap-2 mb-2">
                 <div className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
                 <span className="text-sm font-semibold text-destructive">THREAT DETECTED</span>
               </div>
-              <p className="text-xs text-muted-foreground mb-2">
+              <p className="text-xs text-muted-foreground mb-3">
                 Rerouting... Emergency contacts notified. Risk dropping.
               </p>
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  className="gradient-safe text-accent-foreground text-xs flex-1"
+                  className="gradient-safe text-primary-foreground text-xs flex-1"
                   onClick={() => navigate("/active")}
                 >
                   Safe Route Found
@@ -160,22 +182,6 @@ const Planner = () => {
           className="w-full gradient-purple text-primary-foreground py-5 rounded-xl font-semibold glow-purple"
         >
           <Navigation size={18} className="mr-2" /> Start Trip
-        </Button>
-      </div>
-
-      {/* Bottom actions */}
-      <div className="flex gap-3 px-4 pt-3">
-        <Button
-          variant="outline"
-          className="flex-1 border-border text-foreground"
-          onClick={() => navigate("/active")}
-        >
-          Share Live
-        </Button>
-        <Button
-          className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
-        >
-          SOS Help
         </Button>
       </div>
     </div>
