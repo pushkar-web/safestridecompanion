@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { X, AlertTriangle, Navigation, Phone, Shield, Clock, Heart, Search, Zap, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import RouteMap from "@/components/RouteMap";
 
 const ActiveTrip = () => {
   const navigate = useNavigate();
