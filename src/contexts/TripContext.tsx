@@ -119,7 +119,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
           location: locationText,
           lat: currentLat,
           lng: currentLng,
-          contacts: emergencyContacts.map((c) => c.name),
+          contacts: emergencyContacts.map((c) => ({ name: c.name, phone: c.phone, email: c.email })),
         },
       });
 
