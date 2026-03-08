@@ -13,13 +13,25 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY is not configured");
+
+    const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
+    const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
+    const TWILIO_PHONE_NUMBER = Deno.env.get("TWILIO_PHONE_NUMBER");
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { session_id, location, lat, lng, contacts } = await req.json();
+    // contacts is now an array of { name, phone, email } objects
+    const contactList: Array<{ name: string; phone: string; email: string }> = contacts || [];
 
-    // Use AI to generate the SOS alert message
+    const mapsLink = `https://maps.google.com/?q=${lat},${lng}`;
+    const timestamp = new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" });
+
+    // Generate SOS message using AI
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -31,24 +43,24 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are an emergency SOS system. Generate a concise, urgent emergency alert message for trusted contacts. Include the location and a call to action."
+            content: "You are an emergency SOS system. Generate a concise, urgent emergency alert message."
           },
           {
             role: "user",
-            content: `Generate an SOS alert: User is at ${location} (${lat}, ${lng}). They triggered an emergency alert. Contacts: ${contacts?.join(", ")}. Return JSON: { subject, body, sms_text }`
+            content: `Generate an SOS alert: User is at ${location} (${lat}, ${lng}). Maps: ${mapsLink}. Time: ${timestamp}. Return JSON: { subject, body, sms_text }`
           }
         ],
         tools: [{
           type: "function",
           function: {
             name: "send_sos",
-            description: "Format SOS alert for emergency contacts",
+            description: "Format SOS alert",
             parameters: {
               type: "object",
               properties: {
-                subject: { type: "string", description: "Email subject line" },
-                body: { type: "string", description: "Email body with location details and instructions" },
-                sms_text: { type: "string", description: "Short SMS text under 160 chars" }
+                subject: { type: "string" },
+                body: { type: "string" },
+                sms_text: { type: "string", description: "Under 160 chars" }
               },
               required: ["subject", "body", "sms_text"]
             }
@@ -58,54 +70,126 @@ serve(async (req) => {
       }),
     });
 
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited. Please try again." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
-      }
-      throw new Error(`AI error: ${aiResponse.status}`);
-    }
+    let sosMessage: { subject: string; body: string; sms_text: string };
 
-    const aiData = await aiResponse.json();
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    let sosMessage: any;
-    
-    if (toolCall) {
-      sosMessage = JSON.parse(toolCall.function.arguments);
+    if (aiResponse.ok) {
+      const aiData = await aiResponse.json();
+      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+      if (toolCall) {
+        sosMessage = JSON.parse(toolCall.function.arguments);
+      } else {
+        sosMessage = {
+          subject: "🚨 EMERGENCY SOS - SafeStride Alert",
+          body: `Emergency alert triggered at ${location}.\nGPS: ${lat}, ${lng}\nMaps: ${mapsLink}\nTime: ${timestamp}\nPlease call immediately or contact police at 100.`,
+          sms_text: `SOS! Emergency at ${location}. Maps: ${mapsLink}. Call 100.`
+        };
+      }
     } else {
       sosMessage = {
         subject: "🚨 EMERGENCY SOS - SafeStride Alert",
-        body: `Emergency alert triggered at ${location}. GPS: ${lat}, ${lng}. Please call immediately or contact local police at 100.`,
-        sms_text: `SOS! Emergency at ${location}. Contact police: 100`
+        body: `Emergency alert triggered at ${location}.\nGPS: ${lat}, ${lng}\nMaps: ${mapsLink}\nTime: ${timestamp}\nPlease call immediately or contact police at 100.`,
+        sms_text: `SOS! Emergency at ${location}. Maps: ${mapsLink}. Call 100.`
       };
     }
 
-    // Log SOS event to database
+    const results = { emails_sent: [] as string[], sms_sent: [] as string[], errors: [] as string[] };
+
+    // --- SEND EMAILS via Resend ---
+    const emailRecipients = contactList.filter(c => c.email).map(c => c.email);
+    if (emailRecipients.length > 0) {
+      try {
+        const emailRes = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: "SafeStride SOS <onboarding@resend.dev>",
+            to: emailRecipients,
+            subject: sosMessage.subject,
+            html: `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+                <div style="background:#dc2626;color:white;padding:16px;border-radius:8px 8px 0 0;text-align:center;">
+                  <h1 style="margin:0;font-size:24px;">🚨 EMERGENCY SOS ALERT</h1>
+                </div>
+                <div style="background:#fff;border:1px solid #e5e7eb;padding:20px;border-radius:0 0 8px 8px;">
+                  <p style="font-size:16px;color:#111;margin-bottom:16px;">${sosMessage.body.replace(/\n/g, '<br>')}</p>
+                  <a href="${mapsLink}" style="display:inline-block;background:#dc2626;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;">📍 View Live Location</a>
+                  <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb;">
+                  <p style="font-size:14px;color:#666;">Emergency Numbers:<br>Police: 100 | Women Helpline: 181 | Mumbai Women: 103 | Ambulance: 108</p>
+                </div>
+              </div>
+            `,
+          }),
+        });
+        const emailData = await emailRes.json();
+        if (emailRes.ok) {
+          results.emails_sent = emailRecipients;
+          console.log("Emails sent successfully:", emailData);
+        } else {
+          results.errors.push(`Email error: ${JSON.stringify(emailData)}`);
+          console.error("Resend error:", emailData);
+        }
+      } catch (e) {
+        results.errors.push(`Email exception: ${e instanceof Error ? e.message : String(e)}`);
+        console.error("Email send error:", e);
+      }
+    }
+
+    // --- SEND SMS via Twilio ---
+    if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER) {
+      const phoneRecipients = contactList.filter(c => c.phone).map(c => c.phone);
+      for (const phone of phoneRecipients) {
+        try {
+          const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+          const authHeader = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
+          
+          const smsBody = new URLSearchParams({
+            To: phone,
+            From: TWILIO_PHONE_NUMBER,
+            Body: sosMessage.sms_text + ` ${mapsLink}`,
+          });
+
+          const smsRes = await fetch(twilioUrl, {
+            method: "POST",
+            headers: {
+              Authorization: `Basic ${authHeader}`,
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: smsBody.toString(),
+          });
+          const smsData = await smsRes.json();
+          if (smsRes.ok || smsRes.status === 201) {
+            results.sms_sent.push(phone);
+            console.log("SMS sent to:", phone, smsData.sid);
+          } else {
+            results.errors.push(`SMS to ${phone}: ${JSON.stringify(smsData)}`);
+            console.error("Twilio error for", phone, ":", smsData);
+          }
+        } catch (e) {
+          results.errors.push(`SMS exception for ${phone}: ${e instanceof Error ? e.message : String(e)}`);
+          console.error("SMS send error:", e);
+        }
+      }
+    } else {
+      results.errors.push("Twilio credentials not fully configured - SMS not sent");
+    }
+
+    // Log SOS event
     await supabase.from("trip_history").update({
-      feedback: `SOS_TRIGGERED: ${JSON.stringify(sosMessage)}`
+      feedback: `SOS_TRIGGERED: emails=${results.emails_sent.join(",")}, sms=${results.sms_sent.join(",")}`
     }).eq("session_id", session_id);
 
-    // Return the SOS details (in production, this would also send actual emails/SMS)
     return new Response(JSON.stringify({
       success: true,
       sos_id: `sos_${Date.now()}`,
       message: sosMessage,
-      contacts_notified: contacts || [],
+      results,
       timestamp: new Date().toISOString(),
       location: { lat, lng, name: location },
-      google_maps_link: `https://maps.google.com/?q=${lat},${lng}`,
-      emergency_numbers: {
-        police: "100",
-        women_helpline: "181",
-        mumbai_women: "103",
-        ambulance: "108"
-      }
+      google_maps_link: mapsLink,
+      emergency_numbers: { police: "100", women_helpline: "181", mumbai_women: "103", ambulance: "108" }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
