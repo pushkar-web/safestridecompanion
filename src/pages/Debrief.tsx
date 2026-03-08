@@ -1,7 +1,10 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Shield, CheckCircle, BookOpen, Share2, ChevronRight, MapPin, QrCode } from "lucide-react";
+import { ArrowLeft, Shield, CheckCircle, BookOpen, Share2, ChevronRight, MapPin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { generateBadge, type BadgeData } from "@/lib/safety-ai";
+import { toast } from "@/hooks/use-toast";
 
 const emojis = [
   { emoji: "😊", label: "Great" },
@@ -13,6 +16,31 @@ const emojis = [
 
 const Debrief = () => {
   const navigate = useNavigate();
+  const [badge, setBadge] = useState<BadgeData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBadge = async () => {
+      try {
+        const data = await generateBadge("Andheri", "Bandra", 3);
+        setBadge(data);
+      } catch (e) {
+        console.error("Badge generation error:", e);
+        toast({ title: "Badge Generation", description: "Using default badge", variant: "destructive" });
+        setBadge({
+          badge_title: "Safe Navigator",
+          badge_description: "Completed a safe journey through Mumbai",
+          achievement_message: "Well done! You navigated safely.",
+          safety_tip: "Always stick to well-lit main roads at night.",
+          know_your_rights: { section: "IPC Section 354", description: "Assault or criminal force to woman with intent to outrage her modesty." },
+          rag_sources: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBadge();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-8">
@@ -77,47 +105,77 @@ const Debrief = () => {
         </motion.div>
       </div>
 
-      {/* Safety Badge */}
+      {/* AI-Generated Safety Badge */}
       <motion.div
         className="mx-5 mt-2 card-elevated rounded-xl p-5 flex flex-col items-center"
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Safety Badge Earned</p>
-        <p className="text-sm font-bold text-foreground mb-3">"Pro-Active Protector"</p>
-        <div className="h-20 w-20 rounded-xl bg-secondary border border-border flex items-center justify-center mb-3">
-          <div className="grid grid-cols-4 gap-0.5">
-            {Array.from({ length: 16 }).map((_, i) => (
-              <div
-                key={i}
-                className={`h-4 w-4 rounded-sm ${Math.random() > 0.4 ? "bg-foreground/80" : "bg-transparent"}`}
-              />
-            ))}
+        {loading ? (
+          <div className="flex flex-col items-center gap-3 py-4">
+            <Loader2 size={24} className="text-primary animate-spin" />
+            <p className="text-sm text-muted-foreground">AI generating your badge...</p>
           </div>
-        </div>
-        <Button className="gradient-purple text-primary-foreground rounded-xl px-6 glow-purple">
-          <Share2 size={14} className="mr-2" /> Share Achievement
-        </Button>
+        ) : badge ? (
+          <>
+            <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
+              🏆 AI-Generated Safety Badge
+            </p>
+            <p className="text-lg font-display font-bold text-foreground mb-1">"{badge.badge_title}"</p>
+            <p className="text-xs text-muted-foreground text-center mb-3">{badge.badge_description}</p>
+            
+            {/* Generated badge visual */}
+            <div className="h-24 w-24 rounded-2xl gradient-purple flex items-center justify-center mb-3 glow-purple">
+              <Shield size={40} className="text-primary-foreground" />
+            </div>
+
+            <p className="text-sm text-foreground text-center mb-3">{badge.achievement_message}</p>
+
+            <div className="w-full card-elevated rounded-lg p-3 mb-3 bg-accent/30">
+              <p className="text-[10px] text-primary font-semibold uppercase tracking-wider mb-1">💡 Safety Tip</p>
+              <p className="text-xs text-foreground">{badge.safety_tip}</p>
+            </div>
+
+            <Button className="gradient-purple text-primary-foreground rounded-xl px-6 glow-purple">
+              <Share2 size={14} className="mr-2" /> Share Achievement
+            </Button>
+          </>
+        ) : null}
       </motion.div>
 
-      {/* Know Your Rights */}
+      {/* Know Your Rights - AI sourced */}
       <div className="px-5 pt-5">
         <div className="card-elevated rounded-xl overflow-hidden">
-          <div className="h-32 bg-secondary flex items-center justify-center">
-            <BookOpen size={32} className="text-muted-foreground" />
+          <div className="h-20 bg-accent/30 flex items-center justify-center">
+            <BookOpen size={32} className="text-primary" />
           </div>
           <div className="p-4">
             <h4 className="text-sm font-semibold text-foreground mb-1">Know Your Rights</h4>
-            <p className="text-xs text-muted-foreground mb-3">
-              <strong>IPC Section 354:</strong> Assault or criminal force to woman with intent to outrage her modesty.
-            </p>
+            {badge?.know_your_rights ? (
+              <p className="text-xs text-muted-foreground mb-3">
+                <strong>{badge.know_your_rights.section}:</strong> {badge.know_your_rights.description}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground mb-3">
+                <strong>IPC Section 354:</strong> Assault or criminal force to woman with intent to outrage her modesty.
+              </p>
+            )}
             <Button className="w-full gradient-purple text-primary-foreground rounded-xl text-sm">
               Read More
             </Button>
           </div>
         </div>
       </div>
+
+      {/* RAG Sources */}
+      {badge?.rag_sources && badge.rag_sources.length > 0 && (
+        <div className="px-5 pt-3">
+          <p className="text-[10px] text-muted-foreground text-center">
+            Powered by {badge.rag_sources.length} local safety data sources via RAG
+          </p>
+        </div>
+      )}
 
       {/* Feedback */}
       <div className="px-5 pt-5">

@@ -1,0 +1,4 @@
+project_id = "yitzfkcmozjpmyyejdxh"
+
+[functions.safety-ai]
+verify_jwt = false
