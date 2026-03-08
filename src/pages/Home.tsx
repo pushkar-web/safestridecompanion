@@ -46,8 +46,8 @@ const Home = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-5">
         <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-xl gradient-purple flex items-center justify-center">
-            <Shield size={16} className="text-primary-foreground" />
+          <div className="h-9 w-9 rounded-xl bg-card shadow-sm flex items-center justify-center">
+            <img src={logo} alt="SafeStride" className="h-6 w-6 object-contain" />
           </div>
           <div>
             <span className="font-display font-bold text-foreground text-sm">SafeStride</span>

@@ -160,12 +160,12 @@ const Debrief = () => {
             </div>
 
             <motion.div
-              className="h-24 w-24 rounded-2xl gradient-purple flex items-center justify-center mb-4 badge-glow"
+              className="h-24 w-24 rounded-2xl bg-card flex items-center justify-center mb-4 badge-glow shadow-lg"
               initial={{ rotateY: 180, opacity: 0 }}
               animate={{ rotateY: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
             >
-              <Shield size={40} className="text-primary-foreground" />
+              <img src={logo} alt="SafeStride Badge" className="h-16 w-16 object-contain" />
             </motion.div>
 
             <p className="text-lg font-display font-bold text-foreground mb-1">"{badge.badge_title}"</p>

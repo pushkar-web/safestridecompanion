@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, MapPin, AlertTriangle, Shield, Zap, Navigation, Search, ChevronRight, Phone, Loader2, Sparkles, Route } from "lucide-react";
+import logo from "@/assets/safestride-logo.png";
 import { Button } from "@/components/ui/button";
 import RiskGauge from "@/components/RiskGauge";
 import RouteMap from "@/components/RouteMap";
