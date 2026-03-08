@@ -1,19 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, MapPin, AlertTriangle, Shield, Zap, Navigation, Search, ChevronRight } from "lucide-react";
-import RouteMap from "@/components/RouteMap";
+import { ArrowLeft, MapPin, AlertTriangle, Shield, Zap, Navigation, Search, ChevronRight, Phone, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RiskGauge from "@/components/RiskGauge";
+import RouteMap from "@/components/RouteMap";
+import { assessRouteRisk, type RiskAssessment } from "@/lib/safety-ai";
+import { toast } from "@/hooks/use-toast";
 
 const Planner = () => {
   const navigate = useNavigate();
   const [riskScore, setRiskScore] = useState(85);
   const [stalkerMode, setStalkerMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [assessment, setAssessment] = useState<RiskAssessment | null>(null);
+  const [routeFrom] = useState("Andheri");
+  const [routeTo] = useState("Bandra");
+
+  useEffect(() => {
+    const fetchAssessment = async () => {
+      try {
+        const data = await assessRouteRisk(routeFrom, routeTo, "10 PM");
+        setAssessment(data);
+        setRiskScore(100 - data.risk_score); // Invert: high safety = high score
+      } catch (e) {
+        console.error("Risk assessment error:", e);
+        toast({ title: "AI Assessment", description: "Using cached safety data", variant: "destructive" });
+        setRiskScore(85);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssessment();
+  }, [routeFrom, routeTo]);
 
   const triggerStalker = () => {
     setStalkerMode(true);
-    let current = 85;
+    let current = riskScore;
     const interval = setInterval(() => {
       current -= 3;
       if (current <= 12) {
@@ -23,6 +46,8 @@ const Planner = () => {
       setRiskScore(current);
     }, 80);
   };
+
+  const riskLabel = riskScore >= 70 ? "Safe" : riskScore >= 40 ? "Moderate" : "High Risk";
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -45,7 +70,7 @@ const Planner = () => {
       {/* Route info */}
       <div className="mx-4 card-elevated rounded-xl p-3 mb-4 flex items-center gap-2">
         <MapPin size={16} className="text-primary flex-shrink-0" />
-        <span className="text-sm text-foreground">Central Station via Midtown</span>
+        <span className="text-sm text-foreground">{routeFrom} → {routeTo}</span>
         <ChevronRight size={14} className="text-muted-foreground ml-auto" />
       </div>
 
@@ -53,20 +78,26 @@ const Planner = () => {
       <div className="px-4">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-semibold text-primary">Route Safety</h3>
-          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-            riskScore >= 70 ? "bg-safe/15 text-safe" : riskScore >= 40 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"
-          }`}>
-            {riskScore >= 70 ? "● High" : riskScore >= 40 ? "● Medium" : "● Low"}
-          </span>
+          {loading ? (
+            <Loader2 size={14} className="text-primary animate-spin" />
+          ) : (
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+              riskScore >= 70 ? "bg-safe/15 text-safe" : riskScore >= 40 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"
+            }`}>
+              ● {riskLabel}
+            </span>
+          )}
         </div>
         <div className="card-elevated rounded-xl p-4">
           <p className="text-xs text-muted-foreground text-center mb-1">RISK SCORE GAUGE</p>
           <div className="flex justify-center">
-            <RiskGauge score={riskScore} size={200} label={`${riskScore >= 70 ? "Safe" : riskScore >= 40 ? "Moderate" : "High Risk"}`} />
+            <RiskGauge score={riskScore} size={200} label={riskLabel} />
           </div>
-          <p className="text-[10px] text-muted-foreground text-center mt-1">
-            Statistically safer than 80% of alternate routes
-          </p>
+          {assessment && (
+            <p className="text-[10px] text-muted-foreground text-center mt-1">
+              AI-assessed using {assessment.rag_sources.length} local safety data sources
+            </p>
+          )}
         </div>
       </div>
 
@@ -78,34 +109,58 @@ const Planner = () => {
       {/* AI Safety Insights */}
       <div className="px-4 pt-4">
         <div className="space-y-2">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
-            className="card-elevated rounded-xl p-3 flex items-center gap-3"
-          >
-            <AlertTriangle size={16} className="text-warning flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm text-foreground">Avoid 12th Cross Alley</p>
-              <p className="text-xs text-muted-foreground">Incidents nearby, take Main Link Road</p>
+          {loading ? (
+            <div className="card-elevated rounded-xl p-4 flex items-center justify-center gap-2">
+              <Loader2 size={16} className="text-primary animate-spin" />
+              <span className="text-sm text-muted-foreground">AI analyzing route safety...</span>
             </div>
-            <span className="text-xs font-bold text-safe">+87% safety</span>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 }}
-            className="card-elevated rounded-xl p-3 flex items-center gap-3"
-          >
-            <Zap size={16} className="text-primary flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm text-foreground">Fast ahead quiet. Detour now?</p>
-              <p className="text-xs text-muted-foreground">Alternative route available</p>
-            </div>
-          </motion.div>
+          ) : (
+            assessment?.insights.map((insight, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="card-elevated rounded-xl p-3 flex items-start gap-3"
+              >
+                {insight.type === "warning" ? (
+                  <AlertTriangle size={16} className="text-warning flex-shrink-0 mt-0.5" />
+                ) : insight.type === "safe" ? (
+                  <Shield size={16} className="text-safe flex-shrink-0 mt-0.5" />
+                ) : (
+                  <Zap size={16} className="text-primary flex-shrink-0 mt-0.5" />
+                )}
+                <p className="text-sm text-foreground">{insight.text}</p>
+              </motion.div>
+            ))
+          )}
         </div>
       </div>
+
+      {/* Nearby Resources */}
+      {assessment?.nearby_resources && assessment.nearby_resources.length > 0 && (
+        <div className="px-4 pt-4">
+          <h3 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Nearby Resources</h3>
+          <div className="space-y-2">
+            {assessment.nearby_resources.slice(0, 3).map((resource, i) => (
+              <div key={i} className="card-elevated rounded-xl p-3 flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                  <Phone size={14} className="text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">{resource.name}</p>
+                  <p className="text-xs text-muted-foreground">{resource.type}</p>
+                </div>
+                {resource.phone && (
+                  <a href={`tel:${resource.phone}`} className="text-xs font-bold text-primary">
+                    {resource.phone}
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stalker Demo Button */}
       <div className="px-4 pt-4">
@@ -146,7 +201,7 @@ const Planner = () => {
                   className="text-xs flex-1 border-destructive text-destructive"
                   onClick={() => {
                     setStalkerMode(false);
-                    setRiskScore(85);
+                    setRiskScore(assessment ? 100 - assessment.risk_score : 85);
                   }}
                 >
                   Reset Demo
