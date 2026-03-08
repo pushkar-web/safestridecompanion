@@ -132,7 +132,15 @@ const ActiveTrip = () => {
 
       {/* Real Map */}
       <div className="mx-4 rounded-xl overflow-hidden border border-border">
-        <RouteMap className="h-48" showRoute={true} animateMarker={true} />
+        <RouteMap
+          className="h-48"
+          showRoute={true}
+          animateMarker={true}
+          startLat={trip?.startLat}
+          startLng={trip?.startLng}
+          endLat={trip?.endLat}
+          endLng={trip?.endLng}
+        />
       </div>
 
       {/* Risk Level + Stats */}
