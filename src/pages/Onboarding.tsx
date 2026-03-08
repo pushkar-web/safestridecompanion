@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, UserPlus, Mic, ChevronRight, Lock, Plus, Sparkles, Heart } from "lucide-react";
+import { UserPlus, Mic, ChevronRight, Lock, Plus, Sparkles, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import logo from "@/assets/safestride-logo.png";
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 20 },
@@ -26,13 +27,12 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-background gradient-bg-subtle flex flex-col relative overflow-hidden">
-      {/* Ambient background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-primary/3 blur-3xl pointer-events-none" />
 
       {/* Header */}
       <div className="flex items-center justify-between p-4 z-10">
         <div className="flex items-center gap-1.5">
-          <Shield className="text-primary" size={16} />
+          <img src={logo} alt="SafeStride" className="h-6 w-6 object-contain" />
           <span className="text-xs font-display font-bold text-muted-foreground">SafeStride</span>
         </div>
         <button
@@ -44,14 +44,9 @@ const Onboarding = () => {
       </div>
 
       {/* Hero */}
-      <motion.div
-        className="flex flex-col items-center px-6 pt-4 pb-8 z-10"
-        {...fadeUp(0)}
-      >
-        <motion.div
-          className="mb-5 h-20 w-20 rounded-2xl gradient-purple flex items-center justify-center glow-purple floating"
-        >
-          <Shield size={36} className="text-primary-foreground" />
+      <motion.div className="flex flex-col items-center px-6 pt-4 pb-8 z-10" {...fadeUp(0)}>
+        <motion.div className="mb-5 h-20 w-20 rounded-2xl bg-card flex items-center justify-center glow-purple shadow-lg floating">
+          <img src={logo} alt="SafeStride" className="h-14 w-14 object-contain" />
         </motion.div>
         <h1 className="text-2xl font-display font-bold text-foreground mb-2 tracking-tight">
           Welcome to <span className="text-gradient-purple">SafeStride</span>
@@ -63,58 +58,24 @@ const Onboarding = () => {
 
       {/* Content */}
       <div className="flex-1 px-5 space-y-4 z-10">
-        {/* Trusted Contacts */}
         <motion.div {...fadeUp(0.15)}>
           <h3 className="text-xs font-bold text-primary flex items-center gap-2 mb-3 uppercase tracking-wider">
             <UserPlus size={14} /> Trusted Contacts
           </h3>
-
           <div className="space-y-2.5">
             {contacts.map((c, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.25 + i * 0.08 }}
-                className="flex gap-2"
-              >
-                <Input
-                  placeholder="Name"
-                  value={c.name}
-                  onChange={(e) => {
-                    const updated = [...contacts];
-                    updated[i].name = e.target.value;
-                    setContacts(updated);
-                  }}
-                  className="flex-1 bg-card border-border text-sm h-11 rounded-xl"
-                />
-                <Input
-                  placeholder="Phone Number"
-                  value={c.phone}
-                  onChange={(e) => {
-                    const updated = [...contacts];
-                    updated[i].phone = e.target.value;
-                    setContacts(updated);
-                  }}
-                  className="flex-1 bg-card border-border text-sm h-11 rounded-xl"
-                />
+              <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 + i * 0.08 }} className="flex gap-2">
+                <Input placeholder="Name" value={c.name} onChange={(e) => { const u = [...contacts]; u[i].name = e.target.value; setContacts(u); }} className="flex-1 bg-card border-border text-sm h-11 rounded-xl" />
+                <Input placeholder="Phone Number" value={c.phone} onChange={(e) => { const u = [...contacts]; u[i].phone = e.target.value; setContacts(u); }} className="flex-1 bg-card border-border text-sm h-11 rounded-xl" />
               </motion.div>
             ))}
           </div>
-
-          <button
-            onClick={addContact}
-            className="flex items-center gap-1.5 text-xs text-primary font-semibold mt-2.5 hover:text-primary-glow transition-colors"
-          >
+          <button onClick={addContact} className="flex items-center gap-1.5 text-xs text-primary font-semibold mt-2.5 hover:text-primary-glow transition-colors">
             <Plus size={13} /> Add Another Contact
           </button>
         </motion.div>
 
-        {/* Voice Activation */}
-        <motion.div
-          {...fadeUp(0.3)}
-          className="card-interactive rounded-2xl p-4 flex items-center justify-between"
-        >
+        <motion.div {...fadeUp(0.3)} className="card-interactive rounded-2xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-accent flex items-center justify-center">
               <Mic size={18} className="text-primary" />
@@ -127,11 +88,7 @@ const Onboarding = () => {
           <Switch checked={voiceEnabled} onCheckedChange={setVoiceEnabled} />
         </motion.div>
 
-        {/* Privacy Badge */}
-        <motion.div
-          {...fadeUp(0.4)}
-          className="glass-card rounded-2xl p-4 flex items-start gap-3"
-        >
+        <motion.div {...fadeUp(0.4)} className="glass-card rounded-2xl p-4 flex items-start gap-3">
           <div className="h-9 w-9 rounded-lg bg-safe/10 flex items-center justify-center flex-shrink-0">
             <Lock size={16} className="text-safe" />
           </div>
@@ -148,15 +105,10 @@ const Onboarding = () => {
 
       {/* CTA */}
       <motion.div className="p-5 pb-8 z-10" {...fadeUp(0.5)}>
-        <Button
-          onClick={() => navigate("/home")}
-          className="w-full gradient-purple text-primary-foreground font-semibold py-6 rounded-2xl glow-purple text-base"
-        >
+        <Button onClick={() => navigate("/home")} className="w-full gradient-purple text-primary-foreground font-semibold py-6 rounded-2xl glow-purple text-base">
           <Sparkles size={18} className="mr-2" /> Complete Setup <ChevronRight size={18} className="ml-1" />
         </Button>
-        <p className="text-[10px] text-center text-muted-foreground mt-3">
-          By continuing, you agree to our Terms of Service
-        </p>
+        <p className="text-[10px] text-center text-muted-foreground mt-3">By continuing, you agree to our Terms of Service</p>
       </motion.div>
     </div>
   );

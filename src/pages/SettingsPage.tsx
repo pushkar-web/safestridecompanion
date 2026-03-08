@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, Wifi, MapPin, Shield, Moon, Globe, ChevronRight, RefreshCw, Map, LogOut, Zap, UserPlus, Trash2, Phone, Mail, Sparkles } from "lucide-react";
+import logo from "@/assets/safestride-logo.png";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,8 +63,8 @@ const SettingsPage = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="h-16 w-16 rounded-2xl gradient-purple flex items-center justify-center glow-purple mb-3 floating">
-          <Zap size={28} className="text-primary-foreground" />
+        <div className="h-16 w-16 rounded-2xl bg-card flex items-center justify-center glow-purple shadow-lg mb-3 floating">
+          <img src={logo} alt="SafeStride" className="h-11 w-11 object-contain" />
         </div>
         <p className="text-sm font-display font-bold text-foreground">SafeStride</p>
         <p className="text-[10px] text-muted-foreground flex items-center gap-1">

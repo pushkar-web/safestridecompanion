@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield, Lock, Database, Smartphone, Cloud, RefreshCw, Trash2, Eye, ChevronRight, Sparkles, Fingerprint } from "lucide-react";
+import { Shield, Lock, Database, Cloud, Trash2, Eye, Sparkles, Fingerprint } from "lucide-react";
+import logo from "@/assets/safestride-logo.png";
 import { Button } from "@/components/ui/button";
 
 const Privacy = () => {
@@ -11,8 +12,8 @@ const Privacy = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-5">
         <h1 className="text-base font-display font-bold text-foreground flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg gradient-purple flex items-center justify-center">
-            <Shield size={16} className="text-primary-foreground" />
+          <div className="h-8 w-8 rounded-lg bg-card shadow-sm flex items-center justify-center">
+            <img src={logo} alt="SafeStride" className="h-5 w-5 object-contain" />
           </div>
           Privacy Dashboard
         </h1>
