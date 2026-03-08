@@ -3,7 +3,7 @@ import { Home, Map, Navigation, Shield, Settings } from "lucide-react";
 
 const tabs = [
   { to: "/home", icon: Home, label: "Home" },
-  { to: "/planner", icon: Map, label: "Routes" },
+  { to: "/planner", icon: Map, label: "Route" },
   { to: "/active", icon: Navigation, label: "Map" },
   { to: "/privacy", icon: Shield, label: "Privacy" },
   { to: "/settings", icon: Settings, label: "Settings" },
@@ -15,7 +15,7 @@ const BottomNav = () => {
   if (["/", "/onboarding", "/debrief"].includes(location.pathname)) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-border/40 px-2 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border px-2 pb-safe">
       <div className="mx-auto flex max-w-md items-center justify-around py-2">
         {tabs.map(({ to, icon: Icon, label }) => {
           const isActive = location.pathname === to;

@@ -1,112 +1,103 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield, Lock, Database, Smartphone, Cloud, RefreshCw, Trash2 } from "lucide-react";
+import { Shield, Lock, Database, Smartphone, Cloud, RefreshCw, Trash2, Eye, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Privacy = () => {
+  const [activeTab, setActiveTab] = useState<"home" | "cloud" | "local">("home");
+
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="p-4">
-        <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
-          <Shield className="text-primary" size={22} /> Privacy Center
+      {/* Header */}
+      <div className="flex items-center justify-between p-4">
+        <h1 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
+          <Shield className="text-primary" size={20} /> Privacy Dashboard
         </h1>
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">PRO</span>
       </div>
 
-      {/* Security badges */}
+      {/* Storage + Encryption */}
       <div className="flex gap-3 px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex-1 glass-card rounded-xl p-4 text-center border border-safe/30"
+          className="flex-1 card-elevated rounded-xl p-4 text-center"
         >
-          <Lock size={20} className="text-safe mx-auto mb-2" />
-          <p className="text-sm font-semibold text-safe">Encrypted</p>
+          <Database size={18} className="text-primary mx-auto mb-2" />
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Local Storage</p>
+          <p className="text-xl font-display font-bold text-foreground">1.2 GB</p>
+          <p className="text-[10px] text-muted-foreground">Optimized</p>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="flex-1 glass-card rounded-xl p-4 text-center border border-primary/30"
+          className="flex-1 card-elevated rounded-xl p-4 text-center"
         >
-          <Smartphone size={20} className="text-primary mx-auto mb-2" />
-          <p className="text-sm font-semibold text-primary">100% Local</p>
+          <Lock size={18} className="text-safe mx-auto mb-2" />
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Encryption</p>
+          <p className="text-xl font-display font-bold text-foreground">AES-256</p>
+          <p className="text-[10px] text-muted-foreground">Production Grade</p>
         </motion.div>
       </div>
 
-      {/* How data moves */}
+      {/* Data Flow Tabs */}
       <div className="px-4 pt-5">
-        <h3 className="text-xs font-semibold text-muted-foreground mb-3">HOW YOUR DATA MOVES</h3>
-        <div className="flex items-center justify-center gap-4">
-          {[
-            { icon: Cloud, label: "Cloud" },
-            { icon: Database, label: "Your Phone" },
-            { icon: Lock, label: "Local AI" },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.15 }}
-              className="flex flex-col items-center gap-1"
+        <h3 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+          <Eye size={12} /> DATA FLOW TRANSPARENCY
+        </h3>
+        <div className="flex gap-1 bg-secondary rounded-lg p-1 mb-3">
+          {(["home", "cloud", "local"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 text-xs font-medium py-2 rounded-md transition-colors capitalize ${
+                activeTab === tab
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground"
+              }`}
             >
-              <div className="h-12 w-12 rounded-full glass-card flex items-center justify-center">
-                <item.icon size={18} className="text-primary" />
-              </div>
-              <span className="text-[10px] text-muted-foreground">{item.label}</span>
-            </motion.div>
+              {tab === "local" ? "Local AI" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
           ))}
+        </div>
+        <div className="card-elevated rounded-xl p-3">
+          <p className="text-xs text-muted-foreground">
+            {activeTab === "home" && "Your data is processed and stored locally on your device. No external transfers."}
+            {activeTab === "cloud" && "Encrypted backups are sent to secure cloud storage. Only you hold the key."}
+            {activeTab === "local" && "AI models run entirely on-device. No data leaves your phone for AI processing."}
+          </p>
         </div>
       </div>
 
-      {/* Recent Activity */}
+      {/* Activity Audit Log */}
       <div className="px-4 pt-5">
-        <h3 className="text-xs font-semibold text-muted-foreground mb-3">RECENT ACTIVITY</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xs font-semibold text-muted-foreground">ACTIVITY AUDIT LOG</h3>
+          <button className="text-xs text-primary font-medium">View All</button>
+        </div>
         <div className="space-y-2">
           {[
-            { title: "Mix used for Emoji", desc: "Locally processed, never shared immutably", time: "2m ago" },
-            { title: "Location Ping", desc: "End-to-end encrypted", time: "5m ago" },
-            { title: "Likemind Processing", desc: "A trades places and point offline", time: "8m ago" },
+            { title: "Local Voice Analysis", desc: "Mic used for 2 min for SOS trigger/listening command", time: "2m ago" },
+            { title: "Accelerometer Read", desc: "Motion data analyzed locally for fall detection", time: "5m ago" },
+            { title: "Location Fencing", desc: "Geofence check completed. No breach. Data not transmitted, GPS reads: 4", time: "8m ago" },
           ].map((item, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 + i * 0.1 }}
-              className="glass-card rounded-xl p-3"
+              transition={{ delay: 0.3 + i * 0.1 }}
+              className="card-elevated rounded-xl p-3"
             >
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
                   <p className="text-sm text-foreground font-medium">{item.title}</p>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
                 </div>
-                <span className="text-[10px] text-muted-foreground">{item.time}</span>
+                <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-2">{item.time}</span>
               </div>
             </motion.div>
           ))}
-        </div>
-      </div>
-
-      {/* Offline Intelligence */}
-      <div className="px-4 pt-5">
-        <h3 className="text-xs font-semibold text-muted-foreground mb-3">AI INTELLIGENCE</h3>
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <Database size={18} className="text-primary mt-0.5" />
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-foreground">Offline Intelligence (RAG)</p>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-safe/20 text-safe font-bold">UPDATED</span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Sync your local safety database for offline AI assistance and route analysis.
-              </p>
-              <div className="flex items-center gap-2 mt-2">
-                <Button size="sm" className="gradient-purple text-primary-foreground text-xs h-7">
-                  <RefreshCw size={12} className="mr-1" /> Refresh
-                </Button>
-                <span className="text-[10px] text-safe">Last sync: 2h ago</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Bell, Shield, Mic, ChevronRight, MapPin, Clock, Zap } from "lucide-react";
+import { Bell, Shield, Mic, ChevronRight, Menu, AlertTriangle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Home = () => {
@@ -17,12 +17,15 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <div className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-2">
-          <Shield className="text-primary" size={20} />
-          <span className="font-display font-bold text-foreground">SafeStride</span>
+        <div className="flex items-center gap-3">
+          <Menu size={20} className="text-foreground" />
+          <div className="flex items-center gap-1.5">
+            <Shield className="text-primary" size={18} />
+            <span className="font-display font-bold text-foreground">SafeStride</span>
+          </div>
         </div>
         <button className="relative">
           <Bell size={20} className="text-muted-foreground" />
@@ -30,8 +33,8 @@ const Home = () => {
         </button>
       </div>
 
-      {/* Greeting */}
-      <div className="px-4 pt-2">
+      {/* Greeting + Voice */}
+      <div className="px-5 pt-4 text-center">
         <motion.h1
           className="text-2xl font-display font-bold text-foreground"
           initial={{ opacity: 0, y: 10 }}
@@ -39,92 +42,97 @@ const Home = () => {
         >
           Hello, Ananya
         </motion.h1>
-        <p className="text-sm text-muted-foreground">Your safety is our priority today.</p>
+        <p className="text-sm text-muted-foreground mt-1">Where are we heading today?</p>
+
+        {/* Voice CTA */}
+        <div className="flex flex-col items-center pt-6 pb-2">
+          <motion.button
+            onClick={handleVoice}
+            className={`h-20 w-20 rounded-full flex items-center justify-center ${
+              isListening ? "gradient-safe glow-safe" : "gradient-purple glow-purple"
+            }`}
+            animate={isListening ? { scale: [1, 1.1, 1] } : {}}
+            transition={{ repeat: Infinity, duration: 1 }}
+          >
+            <Mic size={32} className="text-primary-foreground" />
+          </motion.button>
+          <p className="text-xs font-semibold text-primary mt-3 uppercase tracking-wide">
+            {isListening ? "Listening..." : "Speak Route"}
+          </p>
+        </div>
       </div>
 
-      {/* Status cards */}
-      <div className="flex gap-3 px-4 pt-4">
-        {[
-          { icon: Zap, label: "STATUS", sublabel: "HISTORY" },
-        ].map((_, i) => (
-          <div key={i} className="flex gap-2 w-full">
-            <button className="flex-1 glass-card rounded-xl p-3 text-center">
-              <span className="text-xs text-muted-foreground">Status</span>
-            </button>
-            <button className="flex-1 glass-card rounded-xl p-3 text-center">
-              <span className="text-xs text-muted-foreground">History</span>
-            </button>
+      {/* Safety Insights */}
+      <div className="px-5 pt-4">
+        <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+          Safety Insights
+        </h3>
+
+        {/* Today's Risk */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="card-elevated rounded-xl p-4 mb-3"
+        >
+          <div className="flex items-start gap-3">
+            <div className="h-14 w-14 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+              <Shield size={24} className="text-primary" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-foreground">Today's Risk: Low</h4>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-safe/15 text-safe font-bold">✓</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Optimal conditions detected across your usual routes in Mumbai.
+              </p>
+            </div>
           </div>
-        ))}
+        </motion.div>
+
+        {/* Last Trip */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="card-elevated rounded-xl p-4 mb-3"
+        >
+          <div className="flex items-start gap-3">
+            <div className="h-14 w-14 rounded-lg bg-safe/10 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle size={24} className="text-safe" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold text-foreground">Last Trip: Safe</h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                4.3 km from Bandra to Juhu, covered without any alerts.
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      <div className="flex gap-3 px-4 pt-2">
-        <div className="flex-1 glass-card rounded-xl p-3">
-          <p className="text-xs text-muted-foreground">Today's Risk</p>
-          <p className="text-lg font-display font-bold text-safe">Low</p>
-        </div>
-        <div className="flex-1 glass-card rounded-xl p-3">
-          <p className="text-xs text-muted-foreground">Last Trip</p>
-          <p className="text-lg font-display font-bold text-safe">Safe</p>
-        </div>
-      </div>
-
-      {/* Plan Commute CTA */}
+      {/* AI Guardian Feature Card */}
       <motion.div
-        className="mx-4 mt-5 rounded-2xl gradient-purple p-5"
+        className="mx-5 mt-2 rounded-2xl gradient-purple p-5"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.3 }}
+        transition={{ delay: 0.4 }}
       >
-        <h2 className="text-lg font-display font-bold text-primary-foreground">
-          Plan Commute
+        <h2 className="text-base font-display font-bold text-primary-foreground">
+          New Feature: AI Guardian
         </h2>
-        <p className="text-sm text-primary-foreground/80 mb-3">
-          Find the safest route to your destination
+        <p className="text-sm text-primary-foreground/80 mt-1 mb-3">
+          Share live location with emergency contacts automatically after dark.
         </p>
         <Button
-          onClick={() => navigate("/planner")}
+          onClick={() => navigate("/settings")}
           variant="secondary"
-          className="bg-primary-foreground/20 text-primary-foreground border-0 hover:bg-primary-foreground/30"
+          className="bg-primary-foreground/20 text-primary-foreground border-0 hover:bg-primary-foreground/30 text-sm"
         >
-          Find Route <ChevronRight size={16} />
+          Setup Now <ArrowRight size={14} className="ml-1" />
         </Button>
       </motion.div>
-
-      {/* Voice CTA */}
-      <div className="flex flex-col items-center pt-6">
-        <motion.button
-          onClick={handleVoice}
-          className={`h-20 w-20 rounded-full flex items-center justify-center ${
-            isListening ? "gradient-safe glow-safe" : "gradient-purple glow-purple"
-          }`}
-          animate={isListening ? { scale: [1, 1.1, 1] } : {}}
-          transition={{ repeat: Infinity, duration: 1 }}
-        >
-          <Mic size={32} className="text-primary-foreground" />
-        </motion.button>
-        <h3 className="text-lg font-display font-semibold text-foreground mt-3">
-          Speak Route
-        </h3>
-        <p className="text-xs text-muted-foreground">
-          {isListening ? "Listening..." : '"Navigate me safely to Bandra West"'}
-        </p>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="px-4 pt-6">
-        <h3 className="text-sm font-semibold text-foreground mb-3">Recent Activity</h3>
-        <div className="glass-card rounded-xl p-3 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <MapPin size={14} className="text-primary" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm text-foreground">Bandra to Worli</p>
-            <p className="text-xs text-muted-foreground">24m ago</p>
-          </div>
-          <Clock size={14} className="text-muted-foreground" />
-        </div>
-      </div>
     </div>
   );
 };
