@@ -64,7 +64,7 @@ const ActiveTrip = () => {
     }
     toast({
       title: "📞 Incoming Call",
-      description: '"Mom' is calling... (fake call activated)',
+      description: "\"Mom\" is calling... (fake call activated)",
     });
     setTimeout(() => setFakeCallActive(false), 10000);
   };
