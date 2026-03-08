@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, Wifi, MapPin, Shield, Moon, Globe, ChevronRight, RefreshCw, Map, LogOut, Zap, UserPlus, Trash2, Phone, Mail, Sparkles } from "lucide-react";
+import logo from "@/assets/safestride-logo.png";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
