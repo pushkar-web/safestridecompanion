@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Shield, CheckCircle, BookOpen, Share2, ChevronRight, MapPin, Loader2, Sparkles, Star, Clock } from "lucide-react";
+import logo from "@/assets/safestride-logo.png";
 import { Button } from "@/components/ui/button";
 import { generateBadge, type BadgeData } from "@/lib/safety-ai";
 import { useTrip } from "@/contexts/TripContext";
