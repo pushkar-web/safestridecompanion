@@ -1,8 +1,9 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Bell, Shield, Mic, MicOff, AlertTriangle, ArrowRight, Sparkles, MapPin, Clock, TrendingUp } from "lucide-react";
+import { Bell, Mic, MicOff, AlertTriangle, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/safestride-logo.png";
 import { useVoiceInput } from "@/hooks/use-voice-input";
 import { useTrip } from "@/contexts/TripContext";
 import { toast } from "@/hooks/use-toast";
