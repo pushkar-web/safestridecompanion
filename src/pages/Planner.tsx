@@ -117,7 +117,14 @@ const Planner = () => {
 
       {/* Real Map */}
       <div className="mx-4 mt-4 rounded-xl overflow-hidden border border-border">
-        <RouteMap className="h-44" showRoute={true} />
+        <RouteMap
+          className="h-44"
+          showRoute={true}
+          startLat={trip?.startLat}
+          startLng={trip?.startLng}
+          endLat={trip?.endLat}
+          endLng={trip?.endLng}
+        />
       </div>
 
       {/* AI Safety Insights */}
