@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { X, AlertTriangle, Navigation, Phone, Shield, Clock, Heart, Search, Zap, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import RouteMap from "@/components/RouteMap";
 
 const ActiveTrip = () => {
   const navigate = useNavigate();
@@ -69,37 +70,9 @@ const ActiveTrip = () => {
         </div>
       </div>
 
-      {/* Map area */}
-      <div className="mx-4 relative h-44 bg-secondary rounded-xl overflow-hidden border border-border">
-        <div className="absolute inset-0 opacity-20">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="border-b border-border/30" style={{ height: '10%' }} />
-          ))}
-        </div>
-        <svg className="absolute inset-0 w-full h-full">
-          <motion.path
-            d="M 30 140 Q 100 60 180 100 Q 260 140 330 40"
-            fill="none"
-            stroke="hsl(262, 83%, 58%)"
-            strokeWidth="3"
-            strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 6, ease: "linear", repeat: Infinity }}
-          />
-          <motion.circle
-            cx="180"
-            cy="100"
-            r="6"
-            fill="hsl(262, 83%, 58%)"
-            animate={{ cx: [30, 100, 180, 260, 330], cy: [140, 60, 100, 140, 40] }}
-            transition={{ duration: 6, ease: "linear", repeat: Infinity }}
-          />
-        </svg>
-        <div className="absolute bottom-2 right-2 flex flex-col gap-1">
-          <button className="h-7 w-7 rounded-lg bg-card border border-border flex items-center justify-center text-sm text-foreground">+</button>
-          <button className="h-7 w-7 rounded-lg bg-card border border-border flex items-center justify-center text-sm text-foreground">−</button>
-        </div>
+      {/* Real Map */}
+      <div className="mx-4 rounded-xl overflow-hidden border border-border">
+        <RouteMap className="h-48" showRoute={true} animateMarker={true} />
       </div>
 
       {/* Risk Level + Stats */}

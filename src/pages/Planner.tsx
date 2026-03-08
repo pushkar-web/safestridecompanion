@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, MapPin, AlertTriangle, Shield, Zap, Navigation, Search, ChevronRight } from "lucide-react";
+import RouteMap from "@/components/RouteMap";
 import { Button } from "@/components/ui/button";
 import RiskGauge from "@/components/RiskGauge";
 
@@ -69,28 +70,9 @@ const Planner = () => {
         </div>
       </div>
 
-      {/* Map placeholder */}
-      <div className="mx-4 mt-4 rounded-xl overflow-hidden border border-border h-44 relative bg-secondary">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <Navigation size={24} className="text-primary mx-auto mb-1" />
-            <p className="text-xs text-muted-foreground">Route Map Preview</p>
-            <p className="text-[10px] text-muted-foreground">Andheri → Bandra West</p>
-          </div>
-        </div>
-        <svg className="absolute inset-0 w-full h-full">
-          <motion.path
-            d="M 30 140 Q 80 40 180 90 Q 280 140 350 30"
-            fill="none"
-            stroke="hsl(262, 83%, 58%)"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeDasharray="8 4"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 2, ease: "easeInOut" }}
-          />
-        </svg>
+      {/* Real Map */}
+      <div className="mx-4 mt-4 rounded-xl overflow-hidden border border-border">
+        <RouteMap className="h-44" showRoute={true} />
       </div>
 
       {/* AI Safety Insights */}
