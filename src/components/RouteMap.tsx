@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { generateRouteWaypoints } from "@/lib/mumbai-coordinates";
 
 interface RouteMapProps {
   startLat?: number;
@@ -25,7 +26,13 @@ const RouteMap = ({
   const mapInstanceRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!mapRef.current) return;
+
+    // Clean up previous map
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+    }
 
     const map = L.map(mapRef.current, {
       zoomControl: false,
@@ -36,7 +43,6 @@ const RouteMap = ({
       maxZoom: 19,
     }).addTo(map);
 
-    // Custom purple icon
     const purpleIcon = L.divIcon({
       html: `<div style="width:14px;height:14px;border-radius:50%;background:hsl(262,83%,58%);border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,
       iconSize: [14, 14],
@@ -55,15 +61,9 @@ const RouteMap = ({
     L.marker([endLat, endLng], { icon: greenIcon }).addTo(map);
 
     if (showRoute) {
-      // Simulated route waypoints (Mumbai: Andheri to Bandra)
-      const routePoints: L.LatLngExpression[] = [
-        [startLat, startLng],
-        [19.1050, 72.8600],
-        [19.0950, 72.8500],
-        [19.0830, 72.8420],
-        [19.0720, 72.8350],
-        [endLat, endLng],
-      ];
+      const routePoints: L.LatLngExpression[] = generateRouteWaypoints(
+        startLat, startLng, endLat, endLng, 8
+      );
 
       L.polyline(routePoints, {
         color: "hsl(262, 83%, 58%)",
@@ -90,6 +90,7 @@ const RouteMap = ({
           marker.setLatLng(pt);
         }, 2000);
 
+        mapInstanceRef.current = map;
         return () => {
           clearInterval(moveInterval);
           map.remove();
