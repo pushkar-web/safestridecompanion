@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield, Lock, Database, Smartphone, Cloud, RefreshCw, Trash2, Eye, ChevronRight, Sparkles, Fingerprint } from "lucide-react";
+import { Shield, Lock, Database, Cloud, Trash2, Eye, Sparkles, Fingerprint } from "lucide-react";
+import logo from "@/assets/safestride-logo.png";
 import { Button } from "@/components/ui/button";
 
 const Privacy = () => {
