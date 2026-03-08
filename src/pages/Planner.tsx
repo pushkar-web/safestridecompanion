@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, MapPin, AlertTriangle, Shield, Zap, Navigation, Search, ChevronRight } from "lucide-react";
+import RouteMap from "@/components/RouteMap";
 import { Button } from "@/components/ui/button";
 import RiskGauge from "@/components/RiskGauge";
 
