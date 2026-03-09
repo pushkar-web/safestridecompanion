@@ -77,19 +77,32 @@ export default function Community() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // Render map with report markers
-  useEffect(() => {
-    if (view !== "map" || !mapRef.current || reports.length === 0) return;
+  const markersRef = useRef<L.LayerGroup | null>(null);
 
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
-    }
+  // Initialize map once
+  useEffect(() => {
+    if (view !== "map" || !mapRef.current) return;
+    if (mapInstanceRef.current) return;
 
     const map = L.map(mapRef.current, { zoomControl: false, attributionControl: false })
       .setView([19.076, 72.8777], 12);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+    markersRef.current = L.layerGroup().addTo(map);
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+      markersRef.current = null;
+    };
+  }, [view]);
+
+  // Update markers when reports change
+  useEffect(() => {
+    if (!markersRef.current || !mapInstanceRef.current) return;
+
+    markersRef.current.clearLayers();
 
     reports.forEach((report) => {
       const cat = CATEGORIES.find((c) => c.value === report.category);
@@ -104,19 +117,16 @@ export default function Community() {
       });
 
       L.marker([report.latitude, report.longitude], { icon })
-        .addTo(map)
         .bindPopup(`
           <div style="font-family:Inter,sans-serif;min-width:160px">
             <strong style="color:${color}">${cat?.label || report.category}</strong>
             <p style="margin:4px 0;font-size:12px">${report.description}</p>
             <span style="font-size:10px;color:#888">${report.location_name || ""} · ${new Date(report.created_at).toLocaleDateString()}</span>
           </div>
-        `);
+        `)
+        .addTo(markersRef.current!);
     });
-
-    mapInstanceRef.current = map;
-    return () => { map.remove(); mapInstanceRef.current = null; };
-  }, [view, reports]);
+  }, [reports]);
 
   const handleSubmit = async () => {
     if (!description.trim() || !locationName.trim()) {
