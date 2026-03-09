@@ -12,6 +12,7 @@ import ActiveTrip from "./pages/ActiveTrip";
 import Debrief from "./pages/Debrief";
 import Privacy from "./pages/Privacy";
 import SettingsPage from "./pages/SettingsPage";
+import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/active" element={<ActiveTrip />} />
               <Route path="/debrief" element={<Debrief />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/community" element={<Community />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -53,6 +53,45 @@ export type Database = {
         }
         Relationships: []
       }
+      safety_reports: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          latitude: number
+          location_name: string | null
+          longitude: number
+          reporter_name: string | null
+          severity: string
+          upvotes: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          id?: string
+          latitude: number
+          location_name?: string | null
+          longitude: number
+          reporter_name?: string | null
+          severity?: string
+          upvotes?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          latitude?: number
+          location_name?: string | null
+          longitude?: number
+          reporter_name?: string | null
+          severity?: string
+          upvotes?: number
+        }
+        Relationships: []
+      }
       trip_history: {
         Row: {
           badge_description: string | null
