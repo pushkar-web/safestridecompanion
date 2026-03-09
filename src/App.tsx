@@ -12,6 +12,7 @@ import ActiveTrip from "./pages/ActiveTrip";
 import Debrief from "./pages/Debrief";
 import Privacy from "./pages/Privacy";
 import SettingsPage from "./pages/SettingsPage";
+import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 
