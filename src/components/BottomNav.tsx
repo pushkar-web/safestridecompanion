@@ -1,12 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Map, Navigation, Shield, Settings } from "lucide-react";
+import { Home, Map, Navigation, Users, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 
 const tabs = [
   { to: "/home", icon: Home, label: "Home" },
   { to: "/planner", icon: Map, label: "Route" },
   { to: "/active", icon: Navigation, label: "Trip" },
-  { to: "/privacy", icon: Shield, label: "Privacy" },
+  { to: "/community", icon: Users, label: "Community" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 

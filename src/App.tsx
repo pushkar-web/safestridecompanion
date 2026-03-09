@@ -34,6 +34,7 @@ const App = () => (
               <Route path="/active" element={<ActiveTrip />} />
               <Route path="/debrief" element={<Debrief />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/community" element={<Community />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
