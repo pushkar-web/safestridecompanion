@@ -222,7 +222,7 @@ export default function Community() {
       {/* Map or List View */}
       {view === "map" ? (
         <div className="px-4">
-          <div ref={mapRef} className="w-full h-[45vh] rounded-2xl overflow-hidden border border-border shadow-lg" />
+          <div ref={mapRef} className="w-full h-[45vh] rounded-2xl overflow-hidden border border-border shadow-lg" style={{ zIndex: 0 }} />
           {/* Legend */}
           <div className="flex flex-wrap gap-2 mt-3">
             {CATEGORIES.map((cat) => (
