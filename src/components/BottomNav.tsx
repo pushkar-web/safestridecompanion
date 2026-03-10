@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const tabs = [
   { to: "/home", icon: Home, label: "Home" },
   { to: "/planner", icon: Map, label: "Route" },
-  { to: "/active", icon: Navigation, label: "Trip" },
+  { to: "/chat", icon: MessageCircle, label: "SafeChat" },
   { to: "/community", icon: Users, label: "Community" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];

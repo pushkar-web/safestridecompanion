@@ -36,6 +36,7 @@ const App = () => (
               <Route path="/debrief" element={<Debrief />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/community" element={<Community />} />
+              <Route path="/chat" element={<SafeChat />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
