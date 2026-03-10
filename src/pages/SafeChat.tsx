@@ -132,7 +132,7 @@ export default function SafeChat() {
             <p className="text-[10px] text-muted-foreground">Your Mumbai safety companion</p>
           </div>
           <div className="ml-auto flex items-center gap-1 px-2 py-1 rounded-full bg-accent">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] text-muted-foreground font-medium">Online</span>
           </div>
         </div>
