@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Map, Navigation, Users, Settings } from "lucide-react";
+import { Home, Map, MessageCircle, Users, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 
 const tabs = [
