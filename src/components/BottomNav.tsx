@@ -6,7 +6,7 @@ const tabs = [
   { to: "/home", icon: Home, label: "Home" },
   { to: "/planner", icon: Map, label: "Route" },
   { to: "/chat", icon: MessageCircle, label: "SafeChat" },
-  { to: "/community", icon: Users, label: "Community" },
+  { to: "/trips", icon: Navigation, label: "Trips" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
