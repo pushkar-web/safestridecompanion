@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { X, AlertTriangle, Phone, Shield, Heart, Search, Zap, Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RouteMap from "@/components/RouteMap";
+import LiveSharePanel from "@/components/LiveSharePanel";
 import { useTrip } from "@/contexts/TripContext";
 import { toast } from "@/hooks/use-toast";
 
