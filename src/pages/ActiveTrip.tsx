@@ -266,6 +266,9 @@ const ActiveTrip = () => {
           <Shield size={16} className="mr-2" /> End Trip Safely
         </Button>
       </div>
+
+      {/* Live Share */}
+      <LiveSharePanel />
     </div>
   );
 };
