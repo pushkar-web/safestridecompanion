@@ -310,7 +310,7 @@ const TripHistoryPage = () => {
               </div>
               <div className="h-48 flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+              <PieChart>
                     <Pie
                       data={riskDistributionData}
                       cx="50%"
