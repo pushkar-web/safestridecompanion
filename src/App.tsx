@@ -14,6 +14,7 @@ import Privacy from "./pages/Privacy";
 import SettingsPage from "./pages/SettingsPage";
 import Community from "./pages/Community";
 import SafeChat from "./pages/SafeChat";
+import TripHistory from "./pages/TripHistory";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/community" element={<Community />} />
               <Route path="/chat" element={<SafeChat />} />
+              <Route path="/trips" element={<TripHistory />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
