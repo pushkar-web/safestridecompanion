@@ -38,6 +38,7 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/community" element={<Community />} />
               <Route path="/chat" element={<SafeChat />} />
+              <Route path="/trips" element={<TripHistory />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
