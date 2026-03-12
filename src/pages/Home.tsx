@@ -78,7 +78,7 @@ const Home = () => {
         >
           <p className="text-xs text-muted-foreground font-medium mb-1">Good Evening 👋</p>
           <h1 className="text-2xl font-display font-bold text-foreground tracking-tight">
-            Hello, <span className="text-gradient-purple">Ananya</span>
+            Hello, <span className="text-gradient-purple">{userName}</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-1.5">Where are we heading today?</p>
         </motion.div>
