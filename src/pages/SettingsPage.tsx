@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTrip, type EmergencyContact } from "@/contexts/TripContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 const SettingsPage = () => {
