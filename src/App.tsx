@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TripProvider } from "@/contexts/TripContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
@@ -15,6 +16,7 @@ import SettingsPage from "./pages/SettingsPage";
 import Community from "./pages/Community";
 import SafeChat from "./pages/SafeChat";
 import TripHistory from "./pages/TripHistory";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 
@@ -24,27 +26,30 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <TripProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="mx-auto max-w-md min-h-screen relative">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/planner" element={<Planner />} />
-              <Route path="/active" element={<ActiveTrip />} />
-              <Route path="/debrief" element={<Debrief />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/community" element={<Community />} />
-              <Route path="/chat" element={<SafeChat />} />
-              <Route path="/trips" element={<TripHistory />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <BottomNav />
-          </div>
-        </BrowserRouter>
+        <NotificationProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <div className="mx-auto max-w-md min-h-screen relative">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/planner" element={<Planner />} />
+                <Route path="/active" element={<ActiveTrip />} />
+                <Route path="/debrief" element={<Debrief />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/community" element={<Community />} />
+                <Route path="/chat" element={<SafeChat />} />
+                <Route path="/trips" element={<TripHistory />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <BottomNav />
+            </div>
+          </BrowserRouter>
+        </NotificationProvider>
       </TripProvider>
     </TooltipProvider>
   </QueryClientProvider>

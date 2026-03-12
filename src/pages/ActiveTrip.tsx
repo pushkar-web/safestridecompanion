@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import RouteMap from "@/components/RouteMap";
 import LiveSharePanel from "@/components/LiveSharePanel";
 import { useTrip } from "@/contexts/TripContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { toast } from "@/hooks/use-toast";
 
 const ActiveTrip = () => {
   const navigate = useNavigate();
   const { trip, endTrip, incrementRisks, triggerSOS, sosStatus } = useTrip();
+  const { addNotification } = useNotifications();
   const [bpm, setBpm] = useState(72);
   const [riskLevel, setRiskLevel] = useState(15);
   const [elapsed, setElapsed] = useState(0);
@@ -25,6 +27,12 @@ const ActiveTrip = () => {
       setAlert("Unusual Stop Detected");
       setRiskLevel(42);
       incrementRisks();
+      addNotification({
+        type: "safety",
+        title: "⚠️ Unusual Stop Detected",
+        message: `An unusual stop was detected on your route from ${trip?.routeFrom || "origin"} to ${trip?.routeTo || "destination"}. Stay alert.`,
+        icon: "⚠️",
+      });
       setTimeout(() => {
         setAlert(null);
         setRiskLevel(15);
@@ -51,6 +59,12 @@ const ActiveTrip = () => {
 
   const handleSOS = async () => {
     await triggerSOS();
+    addNotification({
+      type: "safety",
+      title: "🚨 SOS Alert Triggered",
+      message: "Emergency contacts have been notified with your live location.",
+      icon: "🚨",
+    });
     toast({
       title: "🚨 SOS Triggered",
       description: "Emergency contacts have been notified with your live location.",

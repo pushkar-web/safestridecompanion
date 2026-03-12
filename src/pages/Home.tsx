@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Bell, Mic, MicOff, AlertTriangle, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield } from "lucide-react";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/safestride-logo.png";
 import { useVoiceInput } from "@/hooks/use-voice-input";
@@ -11,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 const Home = () => {
   const navigate = useNavigate();
   const { startTrip } = useTrip();
+  const { unreadCount } = useNotifications();
   const [spokenText, setSpokenText] = useState("");
 
   const handleVoiceResult = useCallback((text: string) => {
@@ -54,9 +56,13 @@ const Home = () => {
             <p className="text-[9px] text-muted-foreground font-medium">AI Safety Companion</p>
           </div>
         </div>
-        <button className="relative h-10 w-10 rounded-xl glass-card flex items-center justify-center">
+        <button onClick={() => navigate("/notifications")} className="relative h-10 w-10 rounded-xl glass-card flex items-center justify-center">
           <Bell size={18} className="text-muted-foreground" />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary status-dot" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-[8px] font-bold text-primary-foreground">{unreadCount > 9 ? "9+" : unreadCount}</span>
+            </span>
+          )}
         </button>
       </div>
 
