@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 const Home = () => {
   const navigate = useNavigate();
   const { startTrip } = useTrip();
+  const { unreadCount } = useNotifications();
   const [spokenText, setSpokenText] = useState("");
 
   const handleVoiceResult = useCallback((text: string) => {
