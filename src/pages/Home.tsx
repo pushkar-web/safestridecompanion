@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Bell, Mic, MicOff, AlertTriangle, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield } from "lucide-react";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/safestride-logo.png";
 import { useVoiceInput } from "@/hooks/use-voice-input";
