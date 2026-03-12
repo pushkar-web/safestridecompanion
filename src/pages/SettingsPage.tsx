@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { emergencyContacts, setEmergencyContacts } = useTrip();
+  const { signOut, displayName } = useAuth();
   const [sensors, setSensors] = useState({
     proximity: true,
     gps: true,
