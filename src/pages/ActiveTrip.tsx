@@ -59,6 +59,12 @@ const ActiveTrip = () => {
 
   const handleSOS = async () => {
     await triggerSOS();
+    addNotification({
+      type: "safety",
+      title: "🚨 SOS Alert Triggered",
+      message: "Emergency contacts have been notified with your live location.",
+      icon: "🚨",
+    });
     toast({
       title: "🚨 SOS Triggered",
       description: "Emergency contacts have been notified with your live location.",
