@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TripProvider } from "@/contexts/TripContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
@@ -15,6 +16,7 @@ import SettingsPage from "./pages/SettingsPage";
 import Community from "./pages/Community";
 import SafeChat from "./pages/SafeChat";
 import TripHistory from "./pages/TripHistory";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 
