@@ -27,6 +27,12 @@ const ActiveTrip = () => {
       setAlert("Unusual Stop Detected");
       setRiskLevel(42);
       incrementRisks();
+      addNotification({
+        type: "safety",
+        title: "⚠️ Unusual Stop Detected",
+        message: `An unusual stop was detected on your route from ${trip?.routeFrom || "origin"} to ${trip?.routeTo || "destination"}. Stay alert.`,
+        icon: "⚠️",
+      });
       setTimeout(() => {
         setAlert(null);
         setRiskLevel(15);
