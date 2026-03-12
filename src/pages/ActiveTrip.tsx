@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 const ActiveTrip = () => {
   const navigate = useNavigate();
   const { trip, endTrip, incrementRisks, triggerSOS, sosStatus } = useTrip();
+  const { addNotification } = useNotifications();
   const [bpm, setBpm] = useState(72);
   const [riskLevel, setRiskLevel] = useState(15);
   const [elapsed, setElapsed] = useState(0);
