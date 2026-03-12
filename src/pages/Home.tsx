@@ -14,6 +14,8 @@ const Home = () => {
   const navigate = useNavigate();
   const { startTrip } = useTrip();
   const { unreadCount } = useNotifications();
+  const { displayName } = useAuth();
+  const userName = displayName || "there";
   const [spokenText, setSpokenText] = useState("");
 
   const handleVoiceResult = useCallback((text: string) => {
