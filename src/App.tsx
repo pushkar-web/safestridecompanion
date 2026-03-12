@@ -27,32 +27,35 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <TripProvider>
-        <NotificationProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <div className="mx-auto max-w-md min-h-screen relative">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/planner" element={<Planner />} />
-                <Route path="/active" element={<ActiveTrip />} />
-                <Route path="/debrief" element={<Debrief />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/chat" element={<SafeChat />} />
-                <Route path="/trips" element={<TripHistory />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <BottomNav />
-            </div>
-          </BrowserRouter>
-        </NotificationProvider>
-      </TripProvider>
+      <AuthProvider>
+        <TripProvider>
+          <NotificationProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <div className="mx-auto max-w-md min-h-screen relative">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/planner" element={<Planner />} />
+                  <Route path="/active" element={<ActiveTrip />} />
+                  <Route path="/debrief" element={<Debrief />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/community" element={<Community />} />
+                  <Route path="/chat" element={<SafeChat />} />
+                  <Route path="/trips" element={<TripHistory />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <BottomNav />
+              </div>
+            </BrowserRouter>
+          </NotificationProvider>
+        </TripProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
