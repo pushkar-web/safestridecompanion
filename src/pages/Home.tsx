@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Bell, Mic, MicOff, AlertTriangle, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/safestride-logo.png";
 import { useVoiceInput } from "@/hooks/use-voice-input";
@@ -13,6 +14,8 @@ const Home = () => {
   const navigate = useNavigate();
   const { startTrip } = useTrip();
   const { unreadCount } = useNotifications();
+  const { displayName } = useAuth();
+  const userName = displayName || "there";
   const [spokenText, setSpokenText] = useState("");
 
   const handleVoiceResult = useCallback((text: string) => {
@@ -75,7 +78,7 @@ const Home = () => {
         >
           <p className="text-xs text-muted-foreground font-medium mb-1">Good Evening 👋</p>
           <h1 className="text-2xl font-display font-bold text-foreground tracking-tight">
-            Hello, <span className="text-gradient-purple">Ananya</span>
+            Hello, <span className="text-gradient-purple">{userName}</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-1.5">Where are we heading today?</p>
         </motion.div>

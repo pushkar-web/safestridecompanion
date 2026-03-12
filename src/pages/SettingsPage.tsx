@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTrip, type EmergencyContact } from "@/contexts/TripContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { emergencyContacts, setEmergencyContacts } = useTrip();
+  const { signOut, displayName } = useAuth();
   const [sensors, setSensors] = useState({
     proximity: true,
     gps: true,
@@ -241,7 +243,10 @@ const SettingsPage = () => {
 
       {/* Log Out */}
       <div className="px-4 pt-6 pb-4">
-        <button className="w-full text-center text-sm text-destructive font-semibold py-3.5 rounded-2xl border-2 border-destructive/20 hover:bg-destructive/5 transition-colors">
+        <button
+          onClick={async () => { await signOut(); navigate("/auth"); }}
+          className="w-full text-center text-sm text-destructive font-semibold py-3.5 rounded-2xl border-2 border-destructive/20 hover:bg-destructive/5 transition-colors"
+        >
           <LogOut size={14} className="inline mr-2" />
           Log Out
         </button>
