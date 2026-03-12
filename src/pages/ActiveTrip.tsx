@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import RouteMap from "@/components/RouteMap";
 import LiveSharePanel from "@/components/LiveSharePanel";
 import { useTrip } from "@/contexts/TripContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { toast } from "@/hooks/use-toast";
 
 const ActiveTrip = () => {
