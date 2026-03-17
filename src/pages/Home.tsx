@@ -1,10 +1,11 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Bell, Mic, MicOff, AlertTriangle, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield } from "lucide-react";
+import { Bell, Mic, MicOff, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield, Menu } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import AppSidebar from "@/components/AppSidebar";
 import logo from "@/assets/safestride-logo.png";
 import { useVoiceInput } from "@/hooks/use-voice-input";
 import { useTrip } from "@/contexts/TripContext";
@@ -17,6 +18,7 @@ const Home = () => {
   const { displayName } = useAuth();
   const userName = displayName || "there";
   const [spokenText, setSpokenText] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleVoiceResult = useCallback((text: string) => {
     setSpokenText(text);
@@ -47,10 +49,54 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 gradient-bg-subtle">
+    <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
+      {/* 3D Background Effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <motion.div
+          className="absolute w-[600px] h-[600px] rounded-full blur-[120px] -top-48 -left-48"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.06), transparent 70%)" }}
+          animate={{ scale: [1, 1.15, 1], rotate: [0, 15, 0] }}
+          transition={{ repeat: Infinity, duration: 15, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute w-[400px] h-[400px] rounded-full blur-[100px] bottom-0 right-[-100px]"
+          style={{ background: "radial-gradient(circle, hsl(var(--safe) / 0.05), transparent 70%)" }}
+          animate={{ scale: [1.1, 1, 1.1] }}
+          transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
+        />
+        {/* Floating 3D shapes */}
+        {[...Array(4)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-2xl border border-primary/[0.06] bg-primary/[0.02]"
+            style={{
+              width: 30 + i * 15,
+              height: 30 + i * 15,
+              right: `${5 + i * 12}%`,
+              top: `${10 + i * 20}%`,
+            }}
+            animate={{
+              y: [0, -15 - i * 3, 0],
+              rotate: [i * 20, i * 20 + 30, i * 20],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{ repeat: Infinity, duration: 5 + i, delay: i * 0.8 }}
+          />
+        ))}
+      </div>
+
+      {/* Sidebar */}
+      <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
       {/* Header */}
-      <div className="flex items-center justify-between p-4 pt-5">
+      <div className="flex items-center justify-between p-4 pt-5 relative z-10">
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="h-10 w-10 rounded-xl glass-card flex items-center justify-center text-foreground hover:bg-accent/60 transition-colors"
+          >
+            <Menu size={18} />
+          </button>
           <div className="h-9 w-9 rounded-xl bg-card shadow-sm flex items-center justify-center">
             <img src={logo} alt="SafeStride" className="h-6 w-6 object-contain" />
           </div>
@@ -70,7 +116,7 @@ const Home = () => {
       </div>
 
       {/* Greeting + Voice */}
-      <div className="px-5 pt-6 text-center">
+      <div className="px-5 pt-6 text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -86,21 +132,26 @@ const Home = () => {
         {/* Voice CTA */}
         <div className="flex flex-col items-center pt-8 pb-2">
           <motion.div className="relative">
-            {/* Outer ring animation */}
             {isListening && (
               <motion.div
-                className="absolute inset-0 rounded-full bg-safe/20"
+                className="absolute inset-0 rounded-full"
+                style={{ background: "hsl(var(--safe) / 0.2)", margin: -12 }}
                 animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
-                style={{ margin: -12 }}
               />
             )}
             <motion.button
               onClick={handleVoiceToggle}
-              className={`h-22 w-22 rounded-full flex items-center justify-center relative z-10 ${
-                isListening ? "gradient-safe glow-safe" : "gradient-purple glow-purple"
+              className={`rounded-full flex items-center justify-center relative z-10 ${
+                isListening ? "gradient-safe" : "gradient-purple"
               }`}
-              style={{ height: 88, width: 88 }}
+              style={{
+                height: 88,
+                width: 88,
+                boxShadow: isListening
+                  ? "0 12px 40px -8px hsl(var(--safe) / 0.4), 0 0 0 1px hsl(var(--safe) / 0.2)"
+                  : "0 12px 40px -8px hsl(var(--primary) / 0.4), 0 0 0 1px hsl(var(--primary) / 0.2)",
+              }}
               whileTap={{ scale: 0.95 }}
               animate={isListening ? { scale: [1, 1.06, 1] } : {}}
               transition={{ repeat: Infinity, duration: 1.2 }}
@@ -117,16 +168,13 @@ const Home = () => {
             {isListening ? "Listening..." : "Speak Route"}
           </p>
 
-          {/* Live transcript */}
           {(transcript || spokenText) && (
             <motion.div
               initial={{ opacity: 0, y: 8, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               className="mt-3 px-5 py-2.5 rounded-2xl glass-card max-w-[300px]"
             >
-              <p className="text-sm text-foreground italic">
-                "{transcript || spokenText}"
-              </p>
+              <p className="text-sm text-foreground italic">"{transcript || spokenText}"</p>
             </motion.div>
           )}
 
@@ -139,99 +187,107 @@ const Home = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="px-5 pt-4">
+      <div className="px-5 pt-4 relative z-10">
         <div className="flex gap-3">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="flex-1 card-interactive rounded-2xl p-4 text-center"
-          >
-            <div className="h-10 w-10 rounded-xl bg-safe/10 flex items-center justify-center mx-auto mb-2">
-              <TrendingUp size={18} className="text-safe" />
-            </div>
-            <p className="text-lg font-display font-bold text-foreground">12</p>
-            <p className="text-[10px] text-muted-foreground">Trips This Week</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex-1 card-interactive rounded-2xl p-4 text-center"
-          >
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
-              <Shield size={18} className="text-primary" />
-            </div>
-            <p className="text-lg font-display font-bold text-foreground">98%</p>
-            <p className="text-[10px] text-muted-foreground">Safety Score</p>
-          </motion.div>
+          {[
+            { icon: TrendingUp, value: "12", label: "Trips This Week", color: "safe" },
+            { icon: Shield, value: "98%", label: "Safety Score", color: "primary" },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 + i * 0.05 }}
+              className="flex-1 rounded-2xl p-4 text-center relative overflow-hidden"
+              style={{
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border) / 0.6)",
+                boxShadow: "0 4px 20px -5px hsl(var(--primary) / 0.06), 0 1px 3px hsl(var(--foreground) / 0.04)",
+              }}
+            >
+              <div className={`h-10 w-10 rounded-xl bg-${stat.color}/10 flex items-center justify-center mx-auto mb-2`}>
+                <stat.icon size={18} className={`text-${stat.color}`} />
+              </div>
+              <p className="text-lg font-display font-bold text-foreground">{stat.value}</p>
+              <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+            </motion.div>
+          ))}
         </div>
       </div>
 
       {/* Safety Insights */}
-      <div className="px-5 pt-5">
+      <div className="px-5 pt-5 relative z-10">
         <h3 className="text-xs font-bold text-primary uppercase tracking-widest mb-3 flex items-center gap-1.5">
           <Sparkles size={12} /> Safety Insights
         </h3>
 
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="card-interactive rounded-2xl p-4 mb-3"
-        >
-          <div className="flex items-start gap-3">
-            <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
-              <Shield size={22} className="text-primary" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h4 className="text-sm font-semibold text-foreground">Today's Risk: Low</h4>
-                <span className="text-[9px] px-2 py-0.5 rounded-full bg-safe/15 text-safe font-bold uppercase">Safe</span>
+        {[
+          {
+            icon: Shield,
+            title: "Today's Risk: Low",
+            badge: "Safe",
+            badgeColor: "safe",
+            desc: "Optimal conditions detected across your usual routes in Mumbai.",
+          },
+          {
+            icon: MapPin,
+            title: "Last Trip: Safe",
+            desc: "4.3 km from Bandra to Juhu, covered without any alerts.",
+            meta: [
+              { icon: Clock, text: "18 min" },
+              { icon: Shield, text: "0 alerts" },
+            ],
+          },
+        ].map((card, i) => (
+          <motion.div
+            key={card.title}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 + i * 0.05 }}
+            className="rounded-2xl p-4 mb-3"
+            style={{
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border) / 0.6)",
+              boxShadow: "0 4px 20px -5px hsl(var(--primary) / 0.06)",
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
+                <card.icon size={22} className="text-primary" />
               </div>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Optimal conditions detected across your usual routes in Mumbai.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="card-interactive rounded-2xl p-4 mb-3"
-        >
-          <div className="flex items-start gap-3">
-            <div className="h-12 w-12 rounded-xl bg-safe/10 flex items-center justify-center flex-shrink-0">
-              <MapPin size={22} className="text-safe" />
-            </div>
-            <div className="flex-1">
-              <h4 className="text-sm font-semibold text-foreground">Last Trip: Safe</h4>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                4.3 km from Bandra to Juhu, covered without any alerts.
-              </p>
-              <div className="flex items-center gap-3 mt-2">
-                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                  <Clock size={10} /> 18 min
-                </span>
-                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                  <Shield size={10} /> 0 alerts
-                </span>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-foreground">{card.title}</h4>
+                  {card.badge && (
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-safe/15 font-bold uppercase" style={{ color: "hsl(var(--safe))" }}>
+                      {card.badge}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{card.desc}</p>
+                {card.meta && (
+                  <div className="flex items-center gap-3 mt-2">
+                    {card.meta.map((m) => (
+                      <span key={m.text} className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <m.icon size={10} /> {m.text}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        ))}
       </div>
 
       {/* AI Guardian Feature Card */}
       <motion.div
-        className="mx-5 mt-2 rounded-2xl gradient-purple p-5 relative overflow-hidden"
+        className="mx-5 mt-2 rounded-2xl gradient-purple p-5 relative overflow-hidden z-10"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.4 }}
+        style={{ boxShadow: "0 12px 40px -10px hsl(var(--primary) / 0.35)" }}
       >
-        {/* Decorative circles */}
         <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-primary-foreground/5" />
         <div className="absolute -left-4 -bottom-4 w-20 h-20 rounded-full bg-primary-foreground/5" />
 
@@ -240,9 +296,7 @@ const Home = () => {
             <Sparkles size={16} className="text-primary-foreground/80" />
             <span className="text-[10px] text-primary-foreground/60 font-bold uppercase tracking-widest">New Feature</span>
           </div>
-          <h2 className="text-lg font-display font-bold text-primary-foreground">
-            AI Guardian Mode
-          </h2>
+          <h2 className="text-lg font-display font-bold text-primary-foreground">AI Guardian Mode</h2>
           <p className="text-sm text-primary-foreground/75 mt-1 mb-4 leading-relaxed">
             Share live location with emergency contacts automatically after dark.
           </p>
