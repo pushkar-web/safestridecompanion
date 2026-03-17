@@ -13,7 +13,7 @@ const tabs = [
 const BottomNav = () => {
   const location = useLocation();
 
-  if (["/", "/onboarding", "/debrief", "/auth"].includes(location.pathname)) return null;
+  if (["/", "/onboarding", "/debrief", "/auth", "/profile"].includes(location.pathname)) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass-card-strong border-t-0 px-2 pb-safe">

@@ -19,6 +19,7 @@ import Community from "./pages/Community";
 import SafeChat from "./pages/SafeChat";
 import TripHistory from "./pages/TripHistory";
 import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 
@@ -48,6 +49,7 @@ const App = () => (
                   <Route path="/trips" element={<TripHistory />} />
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/profile" element={<Profile />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <BottomNav />
