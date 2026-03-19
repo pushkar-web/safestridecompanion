@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_cache: {
+        Row: {
+          agent_type: string | null
+          context_hash: string
+          created_at: string
+          hit_count: number | null
+          id: string
+          query_hash: string
+          response: Json
+          ttl_seconds: number | null
+        }
+        Insert: {
+          agent_type?: string | null
+          context_hash: string
+          created_at?: string
+          hit_count?: number | null
+          id?: string
+          query_hash: string
+          response: Json
+          ttl_seconds?: number | null
+        }
+        Update: {
+          agent_type?: string | null
+          context_hash?: string
+          created_at?: string
+          hit_count?: number | null
+          id?: string
+          query_hash?: string
+          response?: Json
+          ttl_seconds?: number | null
+        }
+        Relationships: []
+      }
+      chat_history: {
+        Row: {
+          agent_type: string | null
+          content: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          role: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          agent_type?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          agent_type?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
