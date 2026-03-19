@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.sos-alert]
 verify_jwt = false
+
+[functions.multi-agent]
+verify_jwt = false
