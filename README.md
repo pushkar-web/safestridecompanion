@@ -12,11 +12,6 @@
 
 ### 🥈 2nd Place Winner — SheBuilds International Women's Day Buildathon, Mumbai 2026
 
-[
-[
-[
-[
-[
 
 **A privacy-first AI guardian empowering women to commute safely — offline-capable, sensor-driven, and RAG-powered.**
 
