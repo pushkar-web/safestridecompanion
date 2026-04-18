@@ -9,17 +9,18 @@ import { useState } from "react";
 import { useTrip, type EmergencyContact } from "@/contexts/TripContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { useDarkMode } from "@/hooks/use-dark-mode";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { emergencyContacts, setEmergencyContacts } = useTrip();
   const { signOut, displayName } = useAuth();
+  const { isDark, toggle: toggleDark } = useDarkMode();
   const [sensors, setSensors] = useState({
     proximity: true,
     gps: true,
     fall: false,
   });
-  const [darkMode, setDarkMode] = useState(false);
   const [newContact, setNewContact] = useState<EmergencyContact>({ name: "", phone: "", email: "" });
   const [showAddContact, setShowAddContact] = useState(false);
 
@@ -236,7 +237,7 @@ const SettingsPage = () => {
                 <p className="text-[10px] text-muted-foreground">Enhanced night visibility</p>
               </div>
             </div>
-            <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+            <Switch checked={isDark} onCheckedChange={toggleDark} />
           </div>
         </div>
       </div>

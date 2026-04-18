@@ -53,6 +53,48 @@
     --sidebar-border: 240 10% 90%;
     --sidebar-ring: 262 83% 58%;
   }
+
+  .dark {
+    --background: 250 25% 8%;
+    --foreground: 250 15% 95%;
+    --card: 250 20% 12%;
+    --card-foreground: 250 15% 95%;
+    --popover: 250 20% 12%;
+    --popover-foreground: 250 15% 95%;
+    --primary: 262 83% 65%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 280 75% 60%;
+    --secondary: 250 15% 18%;
+    --secondary-foreground: 250 15% 90%;
+    --muted: 250 12% 16%;
+    --muted-foreground: 250 10% 65%;
+    --accent: 262 60% 22%;
+    --accent-foreground: 262 83% 85%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 250 15% 20%;
+    --input: 250 12% 18%;
+    --ring: 262 83% 65%;
+    --safe: 155 65% 50%;
+    --warning: 35 90% 60%;
+    --sidebar-background: 250 20% 10%;
+    --sidebar-foreground: 250 15% 95%;
+    --sidebar-border: 250 15% 18%;
+  }
+
+  .dark .glass-card {
+    background: hsl(250 20% 14% / 0.7) !important;
+    border: 1px solid hsl(262 83% 65% / 0.15) !important;
+  }
+  .dark .glass-card-strong {
+    background: hsl(250 20% 12% / 0.85) !important;
+    border: 1px solid hsl(262 83% 65% / 0.2) !important;
+  }
+  .dark .card-elevated,
+  .dark .card-interactive {
+    background: hsl(250 20% 14%) !important;
+    border: 1px solid hsl(250 15% 22%) !important;
+  }
 }
 
 @layer base {
