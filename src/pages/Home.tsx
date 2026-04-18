@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Bell, Mic, MicOff, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield, Menu } from "lucide-react";
+import { Bell, Mic, MicOff, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield, Menu, Flame, AlertOctagon, Trophy } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -10,15 +10,52 @@ import logo from "@/assets/safestride-logo.png";
 import { useVoiceInput } from "@/hooks/use-voice-input";
 import { useTrip } from "@/contexts/TripContext";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Home = () => {
   const navigate = useNavigate();
   const { startTrip } = useTrip();
   const { unreadCount } = useNotifications();
-  const { displayName } = useAuth();
+  const { displayName, user } = useAuth();
   const userName = displayName || "there";
   const [spokenText, setSpokenText] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats, setStats] = useState({ trips: 0, score: 100, recentReports: 0 });
+  const [recentAlerts, setRecentAlerts] = useState<Array<{ id: string; description: string; location: string; severity: string }>>([]);
+
+  // Greeting based on time of day
+  const hour = new Date().getHours();
+  const greeting = hour < 5 ? "Up Late" : hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : hour < 21 ? "Good Evening" : "Stay Safe Tonight";
+  const greetingEmoji = hour < 5 ? "🌙" : hour < 12 ? "☀️" : hour < 17 ? "👋" : hour < 21 ? "🌆" : "🌙";
+
+  // Fetch real data
+  useEffect(() => {
+    (async () => {
+      const [trips, reports] = await Promise.all([
+        user ? supabase.from("trip_history").select("risks_averted, risk_score").eq("user_id", user.id) : Promise.resolve({ data: [] }),
+        supabase.from("safety_reports").select("id, description, location_name, severity").order("created_at", { ascending: false }).limit(3),
+      ]);
+
+      const tripCount = trips.data?.length || 0;
+      const avgRisk = trips.data?.length
+        ? trips.data.reduce((s: number, t: any) => s + (t.risk_score || 0), 0) / trips.data.length
+        : 25;
+      const score = Math.max(0, Math.min(100, Math.round(100 - avgRisk)));
+
+      setStats({ trips: tripCount, score, recentReports: reports.data?.length || 0 });
+
+      if (reports.data) {
+        setRecentAlerts(
+          reports.data.map((r: any) => ({
+            id: r.id,
+            description: r.description,
+            location: r.location_name || "Mumbai",
+            severity: r.severity,
+          }))
+        );
+      }
+    })();
+  }, [user]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setSpokenText(text);
