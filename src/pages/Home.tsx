@@ -38,7 +38,7 @@ const Home = () => {
 
       const tripCount = trips.data?.length || 0;
       const avgRisk = trips.data?.length
-        ? trips.data.reduce((s: number, t: any) => s + (t.risk_score || 0), 0) / trips.data.length
+        ? (trips.data as any[]).reduce<number>((s, t) => s + (t.risk_score || 0), 0) / trips.data.length
         : 25;
       const score = Math.max(0, Math.min(100, Math.round(100 - avgRisk)));
 
