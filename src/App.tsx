@@ -20,8 +20,13 @@ import SafeChat from "./pages/SafeChat";
 import TripHistory from "./pages/TripHistory";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
+import Heatmap from "./pages/Heatmap";
+import Leaderboard from "./pages/Leaderboard";
+import Emergency from "./pages/Emergency";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
+import InstallPrompt from "./components/InstallPrompt";
+import GeofenceProvider from "./components/GeofenceProvider";
 
 const queryClient = new QueryClient();
 
@@ -50,9 +55,14 @@ const App = () => (
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/heatmap" element={<Heatmap />} />
+                  <Route path="/leaderboard" element={<Leaderboard />} />
+                  <Route path="/emergency" element={<Emergency />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <BottomNav />
+                <InstallPrompt />
+                <GeofenceProvider />
               </div>
             </BrowserRouter>
           </NotificationProvider>
