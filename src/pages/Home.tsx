@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Bell, Mic, MicOff, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield, Menu } from "lucide-react";
+import { Bell, Mic, MicOff, ArrowRight, Sparkles, MapPin, Clock, TrendingUp, Shield, Menu, Flame, AlertOctagon, Trophy } from "lucide-react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -10,15 +10,52 @@ import logo from "@/assets/safestride-logo.png";
 import { useVoiceInput } from "@/hooks/use-voice-input";
 import { useTrip } from "@/contexts/TripContext";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Home = () => {
   const navigate = useNavigate();
   const { startTrip } = useTrip();
   const { unreadCount } = useNotifications();
-  const { displayName } = useAuth();
+  const { displayName, user } = useAuth();
   const userName = displayName || "there";
   const [spokenText, setSpokenText] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats, setStats] = useState({ trips: 0, score: 100, recentReports: 0 });
+  const [recentAlerts, setRecentAlerts] = useState<Array<{ id: string; description: string; location: string; severity: string }>>([]);
+
+  // Greeting based on time of day
+  const hour = new Date().getHours();
+  const greeting = hour < 5 ? "Up Late" : hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : hour < 21 ? "Good Evening" : "Stay Safe Tonight";
+  const greetingEmoji = hour < 5 ? "🌙" : hour < 12 ? "☀️" : hour < 17 ? "👋" : hour < 21 ? "🌆" : "🌙";
+
+  // Fetch real data
+  useEffect(() => {
+    (async () => {
+      const [trips, reports] = await Promise.all([
+        user ? supabase.from("trip_history").select("risks_averted, risk_score").eq("user_id", user.id) : Promise.resolve({ data: [] }),
+        supabase.from("safety_reports").select("id, description, location_name, severity").order("created_at", { ascending: false }).limit(3),
+      ]);
+
+      const tripCount = trips.data?.length || 0;
+      const avgRisk = trips.data?.length
+        ? (trips.data as any[]).reduce<number>((s, t) => s + (t.risk_score || 0), 0) / trips.data.length
+        : 25;
+      const score = Math.max(0, Math.min(100, Math.round(100 - avgRisk)));
+
+      setStats({ trips: tripCount, score, recentReports: reports.data?.length || 0 });
+
+      if (reports.data) {
+        setRecentAlerts(
+          reports.data.map((r: any) => ({
+            id: r.id,
+            description: r.description,
+            location: r.location_name || "Mumbai",
+            severity: r.severity,
+          }))
+        );
+      }
+    })();
+  }, [user]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setSpokenText(text);
@@ -122,7 +159,7 @@ const Home = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-xs text-muted-foreground font-medium mb-1">Good Evening 👋</p>
+          <p className="text-xs text-muted-foreground font-medium mb-1">{greeting} {greetingEmoji}</p>
           <h1 className="text-2xl font-display font-bold text-foreground tracking-tight">
             Hello, <span className="text-gradient-purple">{userName}</span>
           </h1>
@@ -186,12 +223,37 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Quick Actions */}
+      <div className="px-5 pt-4 relative z-10">
+        <div className="grid grid-cols-3 gap-2.5">
+          {[
+            { icon: Flame, label: "Heatmap", to: "/heatmap", color: "warning" },
+            { icon: AlertOctagon, label: "Emergency", to: "/emergency", color: "destructive" },
+            { icon: Trophy, label: "Leaderboard", to: "/leaderboard", color: "primary" },
+          ].map((q, i) => (
+            <motion.button
+              key={q.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + i * 0.05 }}
+              onClick={() => navigate(q.to)}
+              className="rounded-2xl p-3 card-interactive flex flex-col items-center gap-1.5"
+            >
+              <div className={`h-9 w-9 rounded-xl bg-${q.color}/10 flex items-center justify-center`}>
+                <q.icon size={16} className={`text-${q.color}`} />
+              </div>
+              <p className="text-[10px] font-bold text-foreground">{q.label}</p>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
       {/* Quick Stats */}
       <div className="px-5 pt-4 relative z-10">
         <div className="flex gap-3">
           {[
-            { icon: TrendingUp, value: "12", label: "Trips This Week", color: "safe" },
-            { icon: Shield, value: "98%", label: "Safety Score", color: "primary" },
+            { icon: TrendingUp, value: String(stats.trips), label: "Total Trips", color: "safe" },
+            { icon: Shield, value: `${stats.score}%`, label: "Safety Score", color: "primary" },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -215,70 +277,53 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Safety Insights */}
-      <div className="px-5 pt-5 relative z-10">
-        <h3 className="text-xs font-bold text-primary uppercase tracking-widest mb-3 flex items-center gap-1.5">
-          <Sparkles size={12} /> Safety Insights
-        </h3>
+      {/* Recent Safety Alerts */}
+      {recentAlerts.length > 0 && (
+        <div className="px-5 pt-5 relative z-10">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold text-primary uppercase tracking-widest flex items-center gap-1.5">
+              <Sparkles size={12} /> Live Community Alerts
+            </h3>
+            <button onClick={() => navigate("/community")} className="text-[10px] text-primary font-bold">
+              See all →
+            </button>
+          </div>
 
-        {[
-          {
-            icon: Shield,
-            title: "Today's Risk: Low",
-            badge: "Safe",
-            badgeColor: "safe",
-            desc: "Optimal conditions detected across your usual routes in Mumbai.",
-          },
-          {
-            icon: MapPin,
-            title: "Last Trip: Safe",
-            desc: "4.3 km from Bandra to Juhu, covered without any alerts.",
-            meta: [
-              { icon: Clock, text: "18 min" },
-              { icon: Shield, text: "0 alerts" },
-            ],
-          },
-        ].map((card, i) => (
-          <motion.div
-            key={card.title}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 + i * 0.05 }}
-            className="rounded-2xl p-4 mb-3"
-            style={{
-              background: "hsl(var(--card))",
-              border: "1px solid hsl(var(--border) / 0.6)",
-              boxShadow: "0 4px 20px -5px hsl(var(--primary) / 0.06)",
-            }}
-          >
-            <div className="flex items-start gap-3">
-              <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
-                <card.icon size={22} className="text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-semibold text-foreground">{card.title}</h4>
-                  {card.badge && (
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-safe/15 font-bold uppercase" style={{ color: "hsl(var(--safe))" }}>
-                      {card.badge}
-                    </span>
-                  )}
+          {recentAlerts.map((alert, i) => (
+            <motion.div
+              key={alert.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 + i * 0.05 }}
+              onClick={() => navigate("/heatmap")}
+              className="rounded-2xl p-3.5 mb-2 card-interactive cursor-pointer"
+            >
+              <div className="flex items-start gap-3">
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  alert.severity === "critical" || alert.severity === "high" ? "bg-destructive/10" : "bg-warning/10"
+                }`}>
+                  <MapPin size={16} className={
+                    alert.severity === "critical" || alert.severity === "high" ? "text-destructive" : "text-warning"
+                  } />
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{card.desc}</p>
-                {card.meta && (
-                  <div className="flex items-center gap-3 mt-2">
-                    {card.meta.map((m) => (
-                      <span key={m.text} className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        <m.icon size={10} /> {m.text}
-                      </span>
-                    ))}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-foreground truncate">{alert.location}</p>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${
+                      alert.severity === "critical" ? "bg-destructive/15 text-destructive" :
+                      alert.severity === "high" ? "bg-destructive/10 text-destructive" :
+                      "bg-warning/15 text-warning"
+                    }`}>
+                      {alert.severity}
+                    </span>
                   </div>
-                )}
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">{alert.description}</p>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* AI Guardian Feature Card */}
       <motion.div

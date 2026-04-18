@@ -2,27 +2,41 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>SafeStride - AI Safety Companion</title>
-    <link rel="icon" href="/safestride-logo.png" type="image/png" />
-    <meta name="description" content="SafeStride is a privacy-first mobile app where women input commute details (route, time, mode) via voice/text; an AI Agent proactively assesses risks, generates">
-    <meta name="author" content="Lovable" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#7c3aed" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a0d2e" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SafeStride" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
 
-    <!-- TODO: Update og:title to match your application name -->
-    
-    
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/safestride-logo.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/safestride-logo.png" />
+
+    <title>SafeStride — AI Safety Companion for Women</title>
+    <meta name="description" content="Privacy-first AI guardian for safer commutes. Real-time risk assessment, SOS alerts, multi-agent safety AI, and community-powered safety map." />
+    <meta name="author" content="SafeStride" />
+    <meta name="keywords" content="women safety, SOS app, safety companion, route planner, AI safety, Mumbai safety" />
+
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/62063df5-472c-4c73-8bde-fcb16f4cbf53/id-preview-7a06abe5--c6df1602-3972-4f79-9033-ac31b2ce06fe.lovable.app-1772964340535.png">
+    <meta property="og:title" content="SafeStride — AI Safety Companion" />
+    <meta property="og:description" content="Privacy-first AI guardian empowering women to commute safely." />
+    <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/62063df5-472c-4c73-8bde-fcb16f4cbf53/id-preview-7a06abe5--c6df1602-3972-4f79-9033-ac31b2ce06fe.lovable.app-1772964340535.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/62063df5-472c-4c73-8bde-fcb16f4cbf53/id-preview-7a06abe5--c6df1602-3972-4f79-9033-ac31b2ce06fe.lovable.app-1772964340535.png">
-    <meta property="og:title" content="SafeStide">
-  <meta name="twitter:title" content="SafeStide">
-  <meta property="og:description" content="SafeStride is a privacy-first mobile app where women input commute details (route, time, mode) via voice/text; an AI Agent proactively assesses risks, generates">
-  <meta name="twitter:description" content="SafeStride is a privacy-first mobile app where women input commute details (route, time, mode) via voice/text; an AI Agent proactively assesses risks, generates">
-</head>
+    <meta name="twitter:site" content="@SafeStride" />
+    <meta name="twitter:title" content="SafeStride — AI Safety Companion" />
+    <meta name="twitter:description" content="Privacy-first AI guardian empowering women to commute safely." />
+    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/62063df5-472c-4c73-8bde-fcb16f4cbf53/id-preview-7a06abe5--c6df1602-3972-4f79-9033-ac31b2ce06fe.lovable.app-1772964340535.png" />
+
+    <style>
+      html, body { overscroll-behavior-y: none; }
+      body { -webkit-tap-highlight-color: transparent; }
+      .pb-safe { padding-bottom: max(0.375rem, env(safe-area-inset-bottom)); }
+    </style>
+  </head>
 
   <body>
     <div id="root"></div>

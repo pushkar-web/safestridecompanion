@@ -23,10 +23,32 @@ const ActiveTrip = () => {
     const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
     const bpmInterval = setInterval(() => setBpm(Math.floor(Math.random() * 15 + 68)), 3000);
 
+    // Real GPS tracking
+    let watchId: number | null = null;
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        () => {/* live position acknowledged */},
+        (err) => console.warn("GPS:", err.message),
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+      );
+    }
+
     const alertTimeout = setTimeout(() => {
       setAlert("Unusual Stop Detected");
       setRiskLevel(42);
       incrementRisks();
+      // Audio alert (Web Audio API beep)
+      try {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = 880;
+        g.gain.setValueAtTime(0.15, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+        o.start(); o.stop(ctx.currentTime + 0.6);
+      } catch {}
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       addNotification({
         type: "safety",
         title: "⚠️ Unusual Stop Detected",
@@ -43,7 +65,9 @@ const ActiveTrip = () => {
       clearInterval(timer);
       clearInterval(bpmInterval);
       clearTimeout(alertTimeout);
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatTime = (s: number) => {

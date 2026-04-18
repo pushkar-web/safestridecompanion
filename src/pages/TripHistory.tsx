@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Navigation, Shield, Clock, TrendingUp, Calendar, MapPin, Award, ChevronRight } from "lucide-react";
+import { ArrowLeft, Navigation, Shield, Clock, TrendingUp, Calendar, MapPin, Award, ChevronRight, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -162,9 +162,37 @@ const TripHistoryPage = () => {
           </button>
           <h1 className="text-base font-display font-bold text-foreground">Trip History</h1>
         </div>
-        <span className="text-[9px] px-2.5 py-1 rounded-full gradient-purple text-primary-foreground font-bold">
-          {stats.totalTrips} TRIPS
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const headers = ["date", "from", "to", "duration_seconds", "risk_score", "risks_averted", "badge"];
+              const rows = trips.map((t) => [
+                t.created_at,
+                t.start_location || "",
+                t.end_location || "",
+                t.duration_seconds || 0,
+                t.risk_score || 0,
+                t.risks_averted || 0,
+                t.badge_title || "",
+              ]);
+              const csv = [headers.join(","), ...rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))].join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `safestride-trips-${new Date().toISOString().slice(0, 10)}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="h-9 w-9 rounded-xl glass-card flex items-center justify-center text-primary"
+            title="Export CSV"
+          >
+            <Download size={15} />
+          </button>
+          <span className="text-[9px] px-2.5 py-1 rounded-full gradient-purple text-primary-foreground font-bold">
+            {stats.totalTrips} TRIPS
+          </span>
+        </div>
       </div>
 
       {/* Stats Overview */}

@@ -47,6 +47,39 @@ export type Database = {
         }
         Relationships: []
       }
+      badges: {
+        Row: {
+          badge_description: string | null
+          badge_icon: string | null
+          badge_title: string
+          badge_type: string
+          earned_at: string
+          id: string
+          trip_id: string | null
+          user_id: string
+        }
+        Insert: {
+          badge_description?: string | null
+          badge_icon?: string | null
+          badge_title: string
+          badge_type: string
+          earned_at?: string
+          id?: string
+          trip_id?: string | null
+          user_id: string
+        }
+        Update: {
+          badge_description?: string | null
+          badge_icon?: string | null
+          badge_title?: string
+          badge_type?: string
+          earned_at?: string
+          id?: string
+          trip_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_history: {
         Row: {
           agent_type: string | null
@@ -236,6 +269,45 @@ export type Database = {
           start_lng?: number | null
           start_location?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          community_digest: boolean | null
+          created_at: string
+          dark_mode: boolean | null
+          frequent_locations: Json | null
+          geofence_alerts: boolean | null
+          id: string
+          notification_radius_km: number | null
+          time_alerts: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          community_digest?: boolean | null
+          created_at?: string
+          dark_mode?: boolean | null
+          frequent_locations?: Json | null
+          geofence_alerts?: boolean | null
+          id?: string
+          notification_radius_km?: number | null
+          time_alerts?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          community_digest?: boolean | null
+          created_at?: string
+          dark_mode?: boolean | null
+          frequent_locations?: Json | null
+          geofence_alerts?: boolean | null
+          id?: string
+          notification_radius_km?: number | null
+          time_alerts?: boolean | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
