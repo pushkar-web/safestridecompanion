@@ -159,7 +159,7 @@ const Home = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-xs text-muted-foreground font-medium mb-1">Good Evening 👋</p>
+          <p className="text-xs text-muted-foreground font-medium mb-1">{greeting} {greetingEmoji}</p>
           <h1 className="text-2xl font-display font-bold text-foreground tracking-tight">
             Hello, <span className="text-gradient-purple">{userName}</span>
           </h1>
