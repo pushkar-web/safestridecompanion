@@ -229,16 +229,16 @@ ${reportsContext || "No recent reports."}
 
 IMPORTANT: Start your response with exactly "[${agent.name}]" on the first line so the user knows which specialist is helping them.`;
 
-    // Step 4: Call AI with agent-specific prompt (streaming)
+    // Step 4: Call AI with agent-specific prompt
     const contextHash = simpleHash(ragContext + reportsContext);
-    
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [{ role: "system", content: fullSystemPrompt }, ...messages],
-        stream: true,
+        stream: streamRequested,
       }),
     });
 
