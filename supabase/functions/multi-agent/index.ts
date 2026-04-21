@@ -284,6 +284,7 @@ IMPORTANT: Start your response with exactly "[${agent.name}]" on the first line 
         agent_emoji: agent.emoji,
         cached: false,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     // Step 5: Transform the stream to inject agent metadata in the first chunk, and collect response for caching
     const reader = response.body!.getReader();
