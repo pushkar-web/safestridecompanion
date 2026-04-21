@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { MUMBAI_LOCATIONS } from "@/lib/mumbai-coordinates";
 import { useToast } from "@/hooks/use-toast";
+import { useAwardPoints } from "@/hooks/use-points";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import logo from "@/assets/safestride-logo.png";
