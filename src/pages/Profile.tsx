@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Camera, Save, User, Mail, Shield, Sparkles } from "lucide-react";
+import { ArrowLeft, Camera, Save, User, Mail, Shield, Sparkles, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,21 +14,34 @@ const Profile = () => {
   const [name, setName] = useState(displayName || "");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [stats, setStats] = useState({ trips: 0, safety: 100, badges: 0 });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
-    const fetchProfile = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("display_name, avatar_url")
-        .eq("id", user.id)
-        .single();
-      if (data) {
-        setName(data.display_name || "");
-        setAvatarUrl(data.avatar_url || "");
+    const fetchData = async () => {
+      const [profileRes, tripsRes, badgesRes] = await Promise.all([
+        supabase.from("profiles").select("display_name, avatar_url").eq("id", user.id).single(),
+        supabase.from("trip_history").select("risk_score").eq("user_id", user.id),
+        supabase.from("badges").select("id").eq("user_id", user.id),
+      ]);
+
+      if (profileRes.data) {
+        setName(profileRes.data.display_name || "");
+        setAvatarUrl(profileRes.data.avatar_url || "");
       }
+      const trips = tripsRes.data || [];
+      const avgRisk = trips.length
+        ? Math.round(trips.reduce((s, t) => s + (t.risk_score || 0), 0) / trips.length)
+        : 0;
+      setStats({
+        trips: trips.length,
+        safety: Math.max(0, 100 - avgRisk),
+        badges: badgesRes.data?.length || 0,
+      });
     };
-    fetchProfile();
+    fetchData();
   }, [user]);
 
   const handleSave = async () => {
@@ -45,6 +58,58 @@ const Profile = () => {
     } else {
       toast({ title: "Profile updated!", description: "Your changes have been saved." });
     }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 5MB", variant: "destructive" });
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please pick an image", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { cacheControl: "3600", upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const publicUrl = data.publicUrl;
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(publicUrl);
+      toast({ title: "Avatar updated!", description: "Looking great ✨" });
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Upload failed", description: "Try again later", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!user) return;
+    setAvatarUrl("");
+    await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id);
+    toast({ title: "Avatar removed" });
   };
 
   const initials = (name || user?.email || "U")[0].toUpperCase();
@@ -92,15 +157,41 @@ const Profile = () => {
                 <span className="text-4xl font-bold text-primary-foreground">{initials}</span>
               </div>
             )}
+            {uploading && (
+              <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex items-center justify-center">
+                <Loader2 size={28} className="text-primary animate-spin" />
+              </div>
+            )}
             <motion.div
-              className="absolute -inset-3 rounded-[2rem] border border-primary/15"
+              className="absolute -inset-3 rounded-[2rem] border border-primary/15 pointer-events-none"
               animate={{ scale: [1, 1.04, 1], opacity: [0.3, 0.6, 0.3] }}
               transition={{ repeat: Infinity, duration: 3 }}
             />
           </motion.div>
-          <button className="absolute -bottom-2 -right-2 h-10 w-10 rounded-xl gradient-purple flex items-center justify-center shadow-lg">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarUpload}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="absolute -bottom-2 -right-2 h-10 w-10 rounded-xl gradient-purple flex items-center justify-center shadow-lg disabled:opacity-50"
+            aria-label="Upload avatar"
+          >
             <Camera size={16} className="text-primary-foreground" />
           </button>
+          {avatarUrl && (
+            <button
+              onClick={handleRemoveAvatar}
+              className="absolute -bottom-2 -left-2 h-10 w-10 rounded-xl bg-destructive/90 flex items-center justify-center shadow-lg"
+              aria-label="Remove avatar"
+            >
+              <Trash2 size={14} className="text-destructive-foreground" />
+            </button>
+          )}
         </div>
         <p className="text-sm font-display font-bold text-foreground mt-4">{name || "Your Name"}</p>
         <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1">
@@ -144,21 +235,6 @@ const Profile = () => {
           </div>
         </div>
 
-        <div>
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 block">
-            Avatar URL
-          </label>
-          <div className="relative">
-            <Camera size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://example.com/photo.jpg"
-              className="pl-10 h-12 rounded-xl bg-card/60 backdrop-blur-sm border-border/60 text-sm"
-            />
-          </div>
-        </div>
-
         <Button
           onClick={handleSave}
           disabled={saving}
@@ -194,15 +270,15 @@ const Profile = () => {
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center">
-              <p className="text-lg font-display font-bold text-foreground">12</p>
+              <p className="text-lg font-display font-bold text-foreground">{stats.trips}</p>
               <p className="text-[9px] text-muted-foreground">Trips</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-display font-bold text-foreground" style={{ color: "hsl(var(--safe))" }}>98%</p>
+              <p className="text-lg font-display font-bold" style={{ color: "hsl(var(--safe))" }}>{stats.safety}%</p>
               <p className="text-[9px] text-muted-foreground">Safety</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-display font-bold text-foreground">5</p>
+              <p className="text-lg font-display font-bold text-foreground">{stats.badges}</p>
               <p className="text-[9px] text-muted-foreground">Badges</p>
             </div>
           </div>

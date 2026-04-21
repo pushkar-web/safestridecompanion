@@ -6,6 +6,8 @@ import logo from "@/assets/safestride-logo.png";
 import { Button } from "@/components/ui/button";
 import { generateBadge, type BadgeData } from "@/lib/safety-ai";
 import { useTrip } from "@/contexts/TripContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const emojis = [
@@ -19,6 +21,7 @@ const emojis = [
 const Debrief = () => {
   const navigate = useNavigate();
   const { trip } = useTrip();
+  const { user } = useAuth();
   const [badge, setBadge] = useState<BadgeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
@@ -32,6 +35,25 @@ const Debrief = () => {
       try {
         const data = await generateBadge(routeFrom, routeTo, risksAverted);
         setBadge(data);
+
+        // Auto-award badge to user (Batch G polish)
+        if (user && data?.badge_title) {
+          const hour = new Date().getHours();
+          const isNight = hour >= 20 || hour < 6;
+          const tier = risksAverted >= 5 ? "guardian" : risksAverted >= 2 ? "warrior" : "explorer";
+          const badgeType = isNight ? `night_${tier}` : tier;
+          const icon = isNight ? "🌙" : risksAverted >= 5 ? "🛡️" : risksAverted >= 2 ? "⚔️" : "🧭";
+
+          await supabase.from("badges").insert({
+            user_id: user.id,
+            badge_type: badgeType,
+            badge_title: data.badge_title,
+            badge_description: data.badge_description,
+            badge_icon: icon,
+            trip_id: null,
+          });
+          toast({ title: "🏆 Badge unlocked!", description: data.badge_title });
+        }
       } catch (e) {
         console.error("Badge generation error:", e);
         setBadge({
@@ -47,6 +69,7 @@ const Debrief = () => {
       }
     };
     fetchBadge();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeFrom, routeTo, risksAverted]);
 
   const handleShare = async () => {
