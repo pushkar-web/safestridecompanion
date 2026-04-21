@@ -128,7 +128,20 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { messages, force_agent } = await req.json();
+    const body = await req.json();
+    const { force_agent, message } = body;
+    // Support both { messages: [...] } (SafeChat) and { message: "..." } (Heatmap, etc.)
+    const messages: Array<{ role: string; content: string }> = Array.isArray(body.messages)
+      ? body.messages
+      : message
+        ? [{ role: "user", content: String(message) }]
+        : [];
+    if (messages.length === 0) {
+      return new Response(JSON.stringify({ error: "No message provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const lastUserMsg = messages.filter((m: any) => m.role === "user").pop()?.content || "";
 
     // Step 1: Route to the correct agent
