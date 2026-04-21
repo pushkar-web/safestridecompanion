@@ -163,11 +163,24 @@ serve(async (req) => {
     if (cached) {
       const age = (Date.now() - new Date(cached.created_at).getTime()) / 1000;
       if (age < (cached.ttl_seconds || 3600)) {
-        // Cache hit — update hit count and return cached response
+        // Cache hit — update hit count
         await supabase.from("ai_cache").update({ hit_count: (cached.response as any).hit_count ? (cached.response as any).hit_count + 1 : 1 }).eq("id", cached.id);
-        
+
         const cachedContent = (cached.response as any).content || "";
-        // Return as SSE stream for consistency
+
+        // Non-streaming JSON response
+        if (!streamRequested) {
+          return new Response(JSON.stringify({
+            content: cachedContent,
+            response: cachedContent,
+            agent_type: agentType,
+            agent_name: agent.name,
+            agent_emoji: agent.emoji,
+            cached: true,
+          }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // SSE stream for chat clients
         const encoder = new TextEncoder();
         const stream = new ReadableStream({
           start(controller) {
