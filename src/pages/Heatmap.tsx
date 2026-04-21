@@ -125,13 +125,14 @@ const Heatmap = () => {
     try {
       const { data, error } = await supabase.functions.invoke("multi-agent", {
         body: {
-          message: `Give a brief 2-sentence safety summary for ${p.location_name || "this area"} during ${time}. Context: ${p.description}`,
-          context: { lat: p.lat, lng: p.lng, time_of_day: time },
-          session_id: `heatmap_${p.id}`,
+          message: `Give a concise 2-sentence safety summary for ${p.location_name || "this Mumbai area"} during ${time}. Severity: ${p.severity}. Context: ${p.description}. End with one practical safety tip.`,
+          force_agent: "safety_analyst",
+          stream: false,
         },
       });
       if (!error && data) {
-        setAiSummary(data.response || data.message || "Stay alert in this zone and keep emergency contacts ready.");
+        const txt = (data.content || data.response || "").replace(/^\[.*?\]\s*/, "").trim();
+        setAiSummary(txt || "Stay alert in this zone and keep emergency contacts ready.");
       } else {
         setAiSummary("Stay alert in this zone and keep emergency contacts ready.");
       }
