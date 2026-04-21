@@ -260,6 +260,31 @@ IMPORTANT: Start your response with exactly "[${agent.name}]" on the first line 
       });
     }
 
+    // Non-streaming JSON path
+    if (!streamRequested) {
+      const json = await response.json();
+      const content: string = json?.choices?.[0]?.message?.content || "";
+      if (content.length > 20) {
+        try {
+          await supabase.from("ai_cache").upsert({
+            query_hash: queryHash,
+            context_hash: contextHash,
+            response: { content },
+            agent_type: agentType,
+            ttl_seconds: 3600,
+            hit_count: 0,
+          }, { onConflict: "query_hash,context_hash" });
+        } catch (e) { console.error("Cache write error:", e); }
+      }
+      return new Response(JSON.stringify({
+        content,
+        response: content,
+        agent_type: agentType,
+        agent_name: agent.name,
+        agent_emoji: agent.emoji,
+        cached: false,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
     // Step 5: Transform the stream to inject agent metadata in the first chunk, and collect response for caching
     const reader = response.body!.getReader();
     const encoder = new TextEncoder();
