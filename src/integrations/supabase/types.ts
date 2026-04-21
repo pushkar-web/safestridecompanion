@@ -113,6 +113,33 @@ export type Database = {
         }
         Relationships: []
       }
+      point_events: {
+        Row: {
+          action: string
+          amount: number
+          created_at: string
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          amount: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -272,6 +299,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_points: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          last_active_at: string
+          level: number
+          points: number
+          streak_days: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          last_active_at?: string
+          level?: number
+          points?: number
+          streak_days?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          last_active_at?: string
+          level?: number
+          points?: number
+          streak_days?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           community_digest: boolean | null
@@ -316,6 +379,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_points: {
+        Args: { _action: string; _amount: number; _metadata?: Json }
+        Returns: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          last_active_at: string
+          level: number
+          points: number
+          streak_days: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_points"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       match_safety_documents: {
         Args: {
           match_count?: number
