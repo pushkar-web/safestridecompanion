@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { MUMBAI_LOCATIONS } from "@/lib/mumbai-coordinates";
 import { useToast } from "@/hooks/use-toast";
+import { useAwardPoints } from "@/hooks/use-points";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import logo from "@/assets/safestride-logo.png";
@@ -51,6 +52,7 @@ export default function Community() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const { toast } = useToast();
+  const { award } = useAwardPoints();
 
   // Fetch reports
   useEffect(() => {
@@ -156,6 +158,7 @@ export default function Community() {
       toast({ title: "Failed to submit report", variant: "destructive" });
     } else {
       toast({ title: "Report submitted!", description: "Thank you for helping keep Mumbai safer." });
+      await award("report_submitted");
       setShowForm(false);
       setDescription("");
       setLocationName("");

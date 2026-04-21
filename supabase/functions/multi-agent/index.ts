@@ -129,7 +129,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body = await req.json();
-    const { force_agent, message } = body;
+    const { force_agent, message, stream: streamRequested = true } = body;
     // Support both { messages: [...] } (SafeChat) and { message: "..." } (Heatmap, etc.)
     const messages: Array<{ role: string; content: string }> = Array.isArray(body.messages)
       ? body.messages
@@ -163,11 +163,24 @@ serve(async (req) => {
     if (cached) {
       const age = (Date.now() - new Date(cached.created_at).getTime()) / 1000;
       if (age < (cached.ttl_seconds || 3600)) {
-        // Cache hit — update hit count and return cached response
+        // Cache hit — update hit count
         await supabase.from("ai_cache").update({ hit_count: (cached.response as any).hit_count ? (cached.response as any).hit_count + 1 : 1 }).eq("id", cached.id);
-        
+
         const cachedContent = (cached.response as any).content || "";
-        // Return as SSE stream for consistency
+
+        // Non-streaming JSON response
+        if (!streamRequested) {
+          return new Response(JSON.stringify({
+            content: cachedContent,
+            response: cachedContent,
+            agent_type: agentType,
+            agent_name: agent.name,
+            agent_emoji: agent.emoji,
+            cached: true,
+          }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // SSE stream for chat clients
         const encoder = new TextEncoder();
         const stream = new ReadableStream({
           start(controller) {
@@ -216,16 +229,16 @@ ${reportsContext || "No recent reports."}
 
 IMPORTANT: Start your response with exactly "[${agent.name}]" on the first line so the user knows which specialist is helping them.`;
 
-    // Step 4: Call AI with agent-specific prompt (streaming)
+    // Step 4: Call AI with agent-specific prompt
     const contextHash = simpleHash(ragContext + reportsContext);
-    
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [{ role: "system", content: fullSystemPrompt }, ...messages],
-        stream: true,
+        stream: streamRequested,
       }),
     });
 
@@ -245,6 +258,32 @@ IMPORTANT: Start your response with exactly "[${agent.name}]" on the first line 
       return new Response(JSON.stringify({ error: "AI service unavailable" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Non-streaming JSON path
+    if (!streamRequested) {
+      const json = await response.json();
+      const content: string = json?.choices?.[0]?.message?.content || "";
+      if (content.length > 20) {
+        try {
+          await supabase.from("ai_cache").upsert({
+            query_hash: queryHash,
+            context_hash: contextHash,
+            response: { content },
+            agent_type: agentType,
+            ttl_seconds: 3600,
+            hit_count: 0,
+          }, { onConflict: "query_hash,context_hash" });
+        } catch (e) { console.error("Cache write error:", e); }
+      }
+      return new Response(JSON.stringify({
+        content,
+        response: content,
+        agent_type: agentType,
+        agent_name: agent.name,
+        agent_emoji: agent.emoji,
+        cached: false,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Step 5: Transform the stream to inject agent metadata in the first chunk, and collect response for caching

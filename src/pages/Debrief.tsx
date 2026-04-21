@@ -9,6 +9,7 @@ import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useAwardPoints } from "@/hooks/use-points";
 
 const emojis = [
   { emoji: "😊", label: "Great" },
@@ -22,6 +23,7 @@ const Debrief = () => {
   const navigate = useNavigate();
   const { trip } = useTrip();
   const { user } = useAuth();
+  const { award } = useAwardPoints();
   const [badge, setBadge] = useState<BadgeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
@@ -53,6 +55,12 @@ const Debrief = () => {
             trip_id: null,
           });
           toast({ title: "🏆 Badge unlocked!", description: data.badge_title });
+          // Award points: trip + badge + bonus per risk averted
+          await award("trip_completed");
+          await award("badge_earned");
+          if (risksAverted > 0) {
+            await award("high_risk_avoided", risksAverted * 25, { count: risksAverted });
+          }
         }
       } catch (e) {
         console.error("Badge generation error:", e);
