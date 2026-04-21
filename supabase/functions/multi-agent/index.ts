@@ -129,7 +129,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body = await req.json();
-    const { force_agent, message } = body;
+    const { force_agent, message, stream: streamRequested = true } = body;
     // Support both { messages: [...] } (SafeChat) and { message: "..." } (Heatmap, etc.)
     const messages: Array<{ role: string; content: string }> = Array.isArray(body.messages)
       ? body.messages
