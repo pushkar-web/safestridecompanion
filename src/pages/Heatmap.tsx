@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Layers, Clock, MapPin, Loader2, Shield, AlertTriangle, Heart } from "lucide-react";
-import { MapContainer, TileLayer, CircleMarker, Popup, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { supabase } from "@/integrations/supabase/client";
